@@ -15,20 +15,20 @@ class ServerSet:
         self.area = 0.0         # time integrated number in the node
         self.servers = [Server(self.identifier,self.metadata.serverStateType.IDLE)] * self.channels
         self.timer = Timer(self.metadata.numberOfQueue)
-        #TODO definire gli eventi
+        #TODO definire gli eventi e il tempo
     
 class Server:
     def __init__(self,ID,initialState) -> None:
         self.setID = ID
         self.state = initialState  # in example x(t)
         self.client = None
+        self.nextCompletation = None
 
 class Simulation:
     def __init__(self,simulationTime,seed) -> None:
         # Initialize simulation state
         self.simulationTime = simulationTime
         self.seed = seed
-        self.serverSet1 = ServerSet(1, ServerNumber.SET1)
         self.reset_initial_state()
 
     def reset_initial_state(self):
