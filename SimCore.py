@@ -22,7 +22,7 @@ class Server:
         self.setID = ID
         self.state = initialState  # in example x(t)
         self.client = None
-        self.nextCompletation = None
+        self.nextCompletation = None #TODO rimuovere e mettere nel timer ?
 
 class Simulation:
     def __init__(self,simulationTime,seed) -> None:
@@ -40,6 +40,8 @@ class Simulation:
         
     
     def startSimulation(self):
+        #TODO controllo setup e start del sistema GetArrival()
+
         while(  (self.serverSet1.timer.arrival < self.simulationTime) or    \
                 (self.serverSet1.number > 0) or                             \
                 (self.serverSet2.number > 0) or                             \
