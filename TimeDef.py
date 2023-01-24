@@ -5,9 +5,7 @@ INFINITY =  (100.0 * STOP)      # must be much larger than STOP  */
 
 class Timer:
     def __init__(self,nQueue) -> None:
-        self.current        = -1
+        self.current        = START
         self.next           = -1
         self.last           = [-1] * nQueue
     
-    def setCurrent(self,value):
-        self.current = value

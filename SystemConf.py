@@ -76,28 +76,81 @@ class ServerNumber(Enum):
 class SetMetadata:
     numberOfQueue = None
     serverStateType : ServerStateType = None
+    lossPropability = None
+    clientToSStateMap = None
 
 
 class SetMetadata1(SetMetadata):
     numberOfQueue = 1
     serverStateType = ServerStateType1
+    lossPropability = 0.01
+    clientToSStateMap = {   ClientType.SS   : ServerStateType1.BUSY     ,                    \
+                            ClientType.SG   : ServerStateType1.BUSY     ,                    \
+                            ClientType.RS   : ServerStateType1.BUSY     ,                    \
+                            ClientType.RG   : ServerStateType1.BUSY     ,                    \
+                            ClientType.NMOS : ServerStateType1.BUSY     ,                    \
+                            ClientType.NMOG : ServerStateType1.BUSY     ,                    \
+                            ClientType.NMAS : ServerStateType1.BUSY     ,                    \
+                            ClientType.NMAG : ServerStateType1.BUSY     ,                    \
+                            ClientType.NFS  : ServerStateType1.FAMILY   ,                    \
+                            ClientType.NFG  : ServerStateType1.FAMILY   }
 
 class SetMetadata2(SetMetadata):
     numberOfQueue = 1
     serverStateType = ServerStateType2
+    clientToSStateMap = {   ClientType.SS   : ServerStateType2.BUSY     ,                    \
+                            ClientType.SG   : ServerStateType2.BUSY     ,                    \
+                            ClientType.RS   : ServerStateType2.BUSY     ,                    \
+                            ClientType.RG   : ServerStateType2.BUSY     ,                    \
+                            ClientType.NMOS : ServerStateType2.BUSY     ,                    \
+                            ClientType.NMOG : ServerStateType2.BUSY     ,                    \
+                            ClientType.NMAS : ServerStateType2.BUSY     ,                    \
+                            ClientType.NMAG : ServerStateType2.BUSY     ,                    \
+                            ClientType.NFS  : ServerStateType2.FAMILY   ,                    \
+                            ClientType.NFG  : ServerStateType2.FAMILY   }
 
 class SetMetadata3(SetMetadata):
     numberOfQueue = 2
     serverStateType = ServerStateType3
+    clientToSStateMap = {   ClientType.SS   : -1                        ,                    \
+                            ClientType.SG   : -1                        ,                    \
+                            ClientType.RS   : -1                        ,                    \
+                            ClientType.RG   : -1                        ,                    \
+                            ClientType.NMOS : -1                        ,                    \
+                            ClientType.NMOG : -1                        ,                    \
+                            ClientType.NMAS : ServerStateType3.MAGG     ,                    \
+                            ClientType.NMAG : ServerStateType3.MAGG     ,                    \
+                            ClientType.NFS  : ServerStateType3.FAMILY   ,                    \
+                            ClientType.NFG  : ServerStateType3.FAMILY   }
 
 class SetMetadata4(SetMetadata):
     numberOfQueue = 1
     serverStateType = ServerStateType4
     extraNumberOfQueue = 3
+    clientToSStateMap = {   ClientType.SS   : -1                        ,                    \
+                            ClientType.SG   : -1                        ,                    \
+                            ClientType.RS   : ServerStateType4.COMPLETE ,                    \
+                            ClientType.RG   : ServerStateType4.COMPLETE ,                    \
+                            ClientType.NMOS : ServerStateType4.COMPLETE ,                    \
+                            ClientType.NMOG : ServerStateType4.COMPLETE ,                    \
+                            ClientType.NMAS : ServerStateType4.MAGG     ,                    \
+                            ClientType.NMAG : ServerStateType4.MAGG     ,                    \
+                            ClientType.NFS  : ServerStateType4.FAMILY   ,                    \
+                            ClientType.NFG  : ServerStateType4.FAMILY   }
 
 class SetMetadata5(SetMetadata):
     numberOfQueue = 2
     serverStateType = ServerStateType5
+    clientToSStateMap = {   ClientType.SS   : ServerStateType5.SINGOLO  ,                    \
+                            ClientType.SG   : ServerStateType5.GRUPPO   ,                    \
+                            ClientType.RS   : ServerStateType5.SINGOLO  ,                    \
+                            ClientType.RG   : ServerStateType5.GRUPPO   ,                    \
+                            ClientType.NMOS : ServerStateType5.SINGOLO  ,                    \
+                            ClientType.NMOG : ServerStateType5.GRUPPO   ,                    \
+                            ClientType.NMAS : ServerStateType5.SINGOLO  ,                    \
+                            ClientType.NMAG : ServerStateType5.GRUPPO   ,                    \
+                            ClientType.NFS  : ServerStateType5.SINGOLO  ,                    \
+                            ClientType.NFG  : ServerStateType5.GRUPPO   }
 
 class FactorySetMetadata:
     def getMetadata(self,typ:int) -> SetMetadata:
