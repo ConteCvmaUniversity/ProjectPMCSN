@@ -69,6 +69,7 @@ class ServerNumber(Enum):
     SET4    = 3
     SET5    = 3
 
+SERVERNUMBER = 14
 #
 # Metadata for server set
 #
@@ -78,11 +79,13 @@ class SetMetadata:
     serverStateType : ServerStateType = None
     lossPropability = None
     clientToSStateMap = None
+    serverEventNumber = None
 
 
 class SetMetadata1(SetMetadata):
     numberOfQueue = 1
     serverStateType = ServerStateType1
+    serverEventNumber = 2
     lossPropability = 0.01
     clientToSStateMap = {   ClientType.SS   : ServerStateType1.BUSY     ,                    \
                             ClientType.SG   : ServerStateType1.BUSY     ,                    \
@@ -98,6 +101,7 @@ class SetMetadata1(SetMetadata):
 class SetMetadata2(SetMetadata):
     numberOfQueue = 1
     serverStateType = ServerStateType2
+    serverEventNumber = 2
     clientToSStateMap = {   ClientType.SS   : ServerStateType2.BUSY     ,                    \
                             ClientType.SG   : ServerStateType2.BUSY     ,                    \
                             ClientType.RS   : ServerStateType2.BUSY     ,                    \
@@ -112,6 +116,7 @@ class SetMetadata2(SetMetadata):
 class SetMetadata3(SetMetadata):
     numberOfQueue = 2
     serverStateType = ServerStateType3
+    serverEventNumber = 2
     clientToSStateMap = {   ClientType.SS   : -1                        ,                    \
                             ClientType.SG   : -1                        ,                    \
                             ClientType.RS   : -1                        ,                    \
@@ -126,6 +131,7 @@ class SetMetadata3(SetMetadata):
 class SetMetadata4(SetMetadata):
     numberOfQueue = 1
     serverStateType = ServerStateType4
+    serverEventNumber = 3
     extraNumberOfQueue = 3
     clientToSStateMap = {   ClientType.SS   : -1                        ,                    \
                             ClientType.SG   : -1                        ,                    \
@@ -141,6 +147,7 @@ class SetMetadata4(SetMetadata):
 class SetMetadata5(SetMetadata):
     numberOfQueue = 2
     serverStateType = ServerStateType5
+    serverEventNumber = 2
     clientToSStateMap = {   ClientType.SS   : ServerStateType5.SINGOLO  ,                    \
                             ClientType.SG   : ServerStateType5.GRUPPO   ,                    \
                             ClientType.RS   : ServerStateType5.SINGOLO  ,                    \

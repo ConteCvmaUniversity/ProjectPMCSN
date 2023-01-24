@@ -14,7 +14,7 @@ class ServerSet:
         self.number = 0         # number of job in service 
         self.area = 0.0         # time integrated number in the node
         self.servers = [Server(self.identifier,self.metadata.serverStateType.IDLE)] * self.channels
-        self.timer = Timer(self.metadata.numberOfQueue)
+        self.timer = Timer()
         #TODO definire gli eventi e il tempo
     
 class Server:
@@ -51,4 +51,4 @@ class Simulation:
              ):
             
             pass
-
+        #END WHILE
