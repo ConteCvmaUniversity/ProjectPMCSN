@@ -10,10 +10,10 @@ class ServerSet:
         
         self.clients = [0] * CLIENTTYPENUM 
         
-        self.channel = numServ  # represent number of server
+        self.channels = numServ # represent number of server
         self.number = 0         # number of job in service 
-        self.area = 0.0
-        self.servers = [Server(self.identifier,self.metadata.serverStateType.IDLE)] * self.channel 
+        self.area = 0.0         # time integrated number in the node
+        self.servers = [Server(self.identifier,self.metadata.serverStateType.IDLE)] * self.channels
         self.timer = Timer(self.metadata.numberOfQueue)
         #TODO definire gli eventi
     
