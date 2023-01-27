@@ -1,7 +1,9 @@
 from SystemConf import ClientType
+from TimeDef    import Event
 
-def GetArrival(clientType : ClientType ):
-    
+def GetArrival(clientType : ClientType , id ) -> Event:
+    event = None
+
     if (clientType == ClientType.SS):
         pass
 
@@ -31,3 +33,5 @@ def GetArrival(clientType : ClientType ):
 
     elif (clientType == ClientType.NFG):
         pass
+
+    return event

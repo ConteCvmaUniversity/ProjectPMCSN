@@ -1,3 +1,4 @@
+from enum import Enum
 
 START =        0.0              # initial time                   */
 STOP  =    20000.0              # terminal (close the door) time */
@@ -8,13 +9,21 @@ class Timer:
         self.current        = START         # Current time   
         self.arrival        = INFINITY      # Next Arrival time
         self.completation   = INFINITY      # Next Completation time
-        self.next           = None          # Next event TODO serve o è da modificare?
+
+class EventType(Enum):
+    ARRIVAL         = 0
+    COMPLETATION    = 1
 
 
 class Event:
-    def __init__(self) -> None:
+    def __init__(self,typ:EventType) -> None:
         self.time = INFINITY    # Next occurence of an event
+        self.typ = typ          # Event type
         self.client = None      # Client TODO seve o no?
+        self.identifier = None  # Identifier of set and server if completation TODO serve?? 
+
+
+
 
 # statistics for population
 class Area:
