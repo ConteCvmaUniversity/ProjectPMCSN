@@ -35,9 +35,10 @@ class ClientType(Enum):
     NFS     = {"index" : 8 , "type": ClientTV.NEWFAMILY,  "pay": ClientPV.SINGOLO }
     NFG     = {"index" : 9 , "type": ClientTV.NEWFAMILY,  "pay": ClientPV.GRUPPO  }
 
+
 CLIENTTYPENUM = len(ClientType)
 
-class ServerStateType(Enum):
+class ServerStateType():
     IDLE    = -1
 
 class ServerStateType1(ServerStateType):
@@ -75,11 +76,16 @@ SERVERNUMBER = 14
 #
 
 class SetMetadata:
-    numberOfQueue = None
+    numberOfQueue = None                        #Define number of queue in set, consequently number of arrivals type
     serverStateType : ServerStateType = None
     lossPropability = None
     clientToSStateMap = None
     serverEventNumber = None
+
+    def __new__(cls):
+        if not hasattr(cls , 'instance'):
+            cls.instance = super(SetMetadata, cls).__new__(cls)
+        return cls.instance
 
 
 class SetMetadata1(SetMetadata):
@@ -171,3 +177,8 @@ class FactorySetMetadata:
             return SetMetadata4
         elif typ == 5 : 
             return SetMetadata5
+        
+    def __new__(cls):
+        if not hasattr(cls , 'instance'):
+            cls.instance = super(FactorySetMetadata, cls).__new__(cls)
+        return cls.instance
