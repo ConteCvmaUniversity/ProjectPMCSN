@@ -2,7 +2,7 @@
 from SystemConf import *
 from TimeDef    import Timer,Event,Area, EventType
 from Utility    import *
-from Errors     import SimulationStop
+from Errors     import SimulationStop,NoServerIdle
 
 class ServerSet:
 
@@ -72,9 +72,13 @@ class ServerSet:
         self.status.AddClient(cl)
     
     def GetIdleServerId(self):
-        # TODO completare la funzione
-        for server in self.servers:
-            pass
+        if (self.status.number <= self.channels):
+            i = 0
+            while (self.servers[i].state != ServerStateType.IDLE):
+                i+=1
+            return i
+        else:
+            raise NoServerIdle()
             
 
 class ServerSetStatus:
