@@ -1,7 +1,7 @@
 from enum import Enum
-
+from TimeDef import STOP
 # GLOBAL VALUE
-
+simulationTimeG = STOP
 
 
 
@@ -81,6 +81,7 @@ class SetMetadata:
     lossPropability = None
     clientToSStateMap = None
     serverEventNumber = None
+    simulationTime = simulationTimeG
 
     def __new__(cls):
         if not hasattr(cls , 'instance'):

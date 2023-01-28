@@ -1,0 +1,3 @@
+
+class SimulationStop(Exception):
+    pass
