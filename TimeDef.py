@@ -20,11 +20,11 @@ class EventType(Enum):
 
 
 class Event:
-    def __init__(self,typ:EventType) -> None:
+    def __init__(self,typ:EventType,id) -> None:
         self.time = INFINITY    # Next occurence of an event
         self.typ = typ          # Event type
         self.client = None      # Client TODO seve o no?
-        self.identifier = None  # Identifier of set and server if completation TODO serve?? 
+        self.identifier = id    # Identifier of set and server if completation TODO serve?? 
 
 
 

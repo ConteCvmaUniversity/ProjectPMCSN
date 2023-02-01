@@ -4,3 +4,6 @@ class SimulationStop(Exception):
 
 class NoServerIdle(Exception):
     pass
+
+class AllQueueEmpty(Exception):
+    pass
