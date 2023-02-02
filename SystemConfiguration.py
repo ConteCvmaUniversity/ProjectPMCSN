@@ -1,5 +1,6 @@
 from enum import Enum
 from TimeDef import STOP
+
 # GLOBAL VALUE
 simulationTimeG = STOP
 probabilityDiscardSet1 = 0.01

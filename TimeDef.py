@@ -1,15 +1,16 @@
 from enum import Enum
+import SystemConfiguration
 
 START =        0.0              # initial time                   */
-STOP  =    20000.0              # terminal (close the door) time */
+STOP  =        840              # terminal (close the door) time */
 INFINITY =  (100.0 * STOP)      # must be much larger than STOP  */
 
 class Timer:
     def __init__(self) -> None:
-        self.current        = START         # Current time   
-        self.arrival        = INFINITY      # Next Arrival time
-        self.completation   = INFINITY      # Next Completation time
-        # TODO serve un tempo di lavoro e l'ultimo evento?
+        self.current        = START                           # Current time   
+        self.arrival        = [INFINITY] * SystemConfiguration.CLIENTTYPENUM      # Next Arrival time
+        self.completation   = [INFINITY] * SystemConfiguration.CLIENTTYPENUM      # Next Completation time
+        
     
     def UpdateCurrent(self,val):
         self.current = val
@@ -21,11 +22,11 @@ class EventType(Enum):
 
 
 class Event:
-    def __init__(self,typ:EventType,id) -> None:
-        self.time = INFINITY    # Next occurence of an event
+    def __init__(self,typ:EventType,id,client,time) -> None:
+        self.time = time        # Occurence of event
         self.typ = typ          # Event type
-        self.client = None      # Client TODO seve o no?
-        self.identifier = id    # Identifier of set and server if completation TODO serve?? 
+        self.client = client    # Client 
+        self.identifier = id    # Identifier of set and server if completation
     # TODO creare una funzione di init in base al tipo di evento?
     
 

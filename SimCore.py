@@ -1,5 +1,5 @@
 # File whit Simulation core function
-from SystemConf import *
+from SystemConfiguration import *
 from TimeDef    import Timer,Event,Area, EventType
 from Utility    import *
 from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty , SimulationError
@@ -13,10 +13,11 @@ class ServerSet:
         self.channels = numServer       # number of server
         self.area = Area(self.metadata.numberOfQueue) # time integrated number in the node 
         self.events = [] # List of event in set can be arrival or a server completation 
-        self.servers = [Server(self.identifier,i)for i in range(0,self.channels)] 
+        self.servers = [Server(self.identifier,i) for i in range(0,self.channels)] 
         self.timer = Timer()
         
-        #TODO definire gli eventi e il tempo
+    
+
 
     def hasJob(self) -> bool:
         if self.status.number > 0:
@@ -26,30 +27,33 @@ class ServerSet:
         
     def GetArrivalForAllEvent(self):        
         for elem in list(ClientType):
-            self.AddEvent(GetArrival(elem,self.identifier))
-        self.UpdateTimer() # update information about next arrival
+            ev:Event = GetArrival(elem,self.identifier,self.timer.arrival[elem.value["index"]])
+            print("Value ev: \n{}".format(ev))
+            self.AddEvent(ev)
+        
     
     def GetArrivalByClient(self,cl:ClientType):
         # A new arrival can by added only if it's time is not over the limit
-        ev = GetArrival(cl,self.identifier)
+        ev:Event = GetArrival(cl,self.identifier,self.timer.arrival[cl.value["index"]])
         if ev.time > self.metadata.simulationTime:
             self.AddEvent(ev)
-            self.UpdateTimer()
+            
         else:
             raise SimulationStop("New Arrival time largen than simulation Time val:{}".format(ev.time))
     
     
         
     def AddEvent(self,event:Event):
-        self.events = sorted(self.events.append(event) , key=lambda event:event.time)
-        self.UpdateTimer() #TODO vedere se serve o rimuovere
+        self.events.append(event)
+        self.events.sort(key=lambda event:event.time)
+        self.UpdateTimer(event) #TODO vedere se serve o rimuovere
     
-    def UpdateTimer(self):
-        ne = self.getNextEvent()
-        if (ne.typ == EventType.ARRIVAL):
-            self.timer.arrival = ne.time
-        elif (ne.typ == EventType.COMPLETATION):
-            self.timer.completation = ne.time
+    def UpdateTimer(self,event:Event):
+        idx = event.client.value["index"]
+        if (event.typ == EventType.ARRIVAL):
+            self.timer.arrival[idx] = event.time
+        elif (event.typ == EventType.COMPLETATION):
+            self.timer.completation[idx] = event.time
     
     def UpdateSetArea(self,globalTime):
         if self.status.number > 0:
@@ -82,10 +86,11 @@ class ServerSet:
         self.status.RemoveClient(cl)
         
 
-    def GetService(self,client,id,serverState):
+    def AddService(self,client,id,serverState):
         
         ev = GetService(self.timer.current,client,id,serverState)
         self.AddEvent(ev)
+        self.UpdateTimer(ev)
         self.status.AddServedClient(client)
     
     def GetIdleServerId(self):
@@ -107,11 +112,12 @@ class ServerSet:
                 client = self.status.GetFirstClientQueueNotEmptyPriority()
             else:
                 client = self.status.GetFirstClientQueueNotEmpty()
+
             serverNewState = self.metadata.clientToSStateMap[client]
             if serverNewState == -1:
                 raise SimulationError("Server {} receive a client not admitted {}".format((self.identifier,serverId),client))
             
-            self.GetService(client,server.GetServerIdentifier(),serverNewState)
+            self.AddService(client,server.GetServerIdentifier(),serverNewState)
             #Update server state
             server.UpdateState(serverNewState,client)
 
@@ -130,6 +136,22 @@ class ServerSetStatus:
         self.servedClients = [0] * CLIENTTYPENUM        # Served number of client for each type
         self.number = 0                                 # Number of job in set
         self.completed = [0] * CLIENTTYPENUM            # Number of completed job
+    
+    def GetStats(self) -> dict:
+        stats = {}
+        stats["Total job"] = self.number
+        for elem in list(ClientType):
+            temp = {}
+            temp["type"] = elem
+            idx = elem.value["index"]
+            temp["client"] = self.clients[idx]
+            temp["served"] = self.servedClients[idx]
+            temp["completed"] = self.completed[idx]
+            temp["queue"] = self.__clientInQueue[elem]
+
+            stats[elem] = temp
+        return stats
+
     
     def AddClient(self,cl:ClientType):
         self.clients[cl.value["index"]]   += 1
@@ -212,11 +234,11 @@ class Simulation:
         self.reset_initial_state()
 
     def reset_initial_state(self):
-        self.serverSets.append( ServerSet(1, ServerNumber.SET1) ) 
-        self.serverSets.append( ServerSet(2, ServerNumber.SET2) ) 
-        self.serverSets.append( ServerSet(3, ServerNumber.SET3) ) 
-        self.serverSets.append( ServerSet(4, ServerNumber.SET4) ) 
-        self.serverSets.append( ServerSet(5, ServerNumber.SET5) )
+        self.serverSets.append( ServerSet(1, ServerNumber.SET1.value) ) 
+        self.serverSets.append( ServerSet(2, ServerNumber.SET2.value) ) 
+        self.serverSets.append( ServerSet(3, ServerNumber.SET3.value) ) 
+        self.serverSets.append( ServerSet(4, ServerNumber.SET4.value) ) 
+        self.serverSets.append( ServerSet(5, ServerNumber.SET5.value) )
         
     
     def startSimulation(self):
@@ -224,8 +246,10 @@ class Simulation:
         self.serverSets[0].GetArrivalForAllEvent()
 
         #TODO plant seeds??
+        plantSeeds(self.seed)
+        
 
-        while(  (continueSim) or                        \
+        while(  (self.continueSim) or                        \
                 (self.serverSets[0].hasJob() > 0) or    \
                 (self.serverSets[1].hasJob() > 0) or    \
                 (self.serverSets[2].hasJob() > 0) or    \
@@ -262,7 +286,7 @@ class Simulation:
                         # SetUp stop simulation
                         # TODO controllare se basta aggiornare solo questa variabile
                         print("Simulation Stop raised from GetArrivalByClient: {}".format(stop))
-                        continueSim = False
+                        self.continueSim = False
                     
                     # Schedule the arrival and generate completation event
                     # If a server is free
@@ -281,7 +305,7 @@ class Simulation:
 
                     # A completation in this set generate an event for set 2
                     # First generate a discard probability
-                    discardProb = GetRandom(0)
+                    discardProb = GetRandom(DISC_PROB_STREAM)
 
                     if (discardProb > probabilityDiscardSet1):
                         # schedule an arrival for set 2
@@ -403,9 +427,13 @@ class Simulation:
             # if debug is on print update of simulation
 
             if __debug__ :
-                self.printDebugUpdate()           
+                self.__printDebugUpdate(self.next,selectedSet)           
 
         #END WHILE
+
+        # TODO caso stazionario
+
+        # TODO 
     
     # This function search next event from events list of the sets and pop it
     def __getNextEvent(self,priority=False) -> Event:
@@ -415,6 +443,24 @@ class Simulation:
 
     
 
-    def printDebugUpdate():
-        #TODO
-        pass
+    def __printDebugUpdate(event:Event,set:ServerSet):
+        print("\n--------------------Event Stats--------------------")
+        typ = event.typ
+        if (typ == EventType.ARRIVAL):
+            print("Arrival event at set: {}, client: {}\n".format(event.identifier,event.client))
+        else:
+            print("Completation event at set: {}, server: {}, client: {}\n".format(event.identifier[0],event.identifier[1],event.client))
+        
+        print("--------------------Set Stats--------------------")
+        print("Set time:\n\tCurrent\tArrival\tCompletation\n\t{}\t{}\t{}".format(set.timer.current,set.timer.arrival,set.timer.completation))
+        statusStats = set.status.GetStats()
+        setId = set.identifier
+        print("Set [{}] numer of job: {} ".format(setId,statusStats["Total job"]))
+
+        for elem in list(ClientType):
+            # TODO better print
+            print("{}".format(statusStats[elem]))
+        
+        # TODO need server stats??
+
+        print("\n--------------------End Stats--------------------")

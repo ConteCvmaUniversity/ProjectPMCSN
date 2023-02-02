@@ -1,6 +1,6 @@
 import time
-import SimCore
-import SystemConf 
+from SimCore import Simulation
+
 
 # Main function 
 def main():
@@ -26,6 +26,9 @@ def main():
 
         if (inp == 1) :
             print("1")
+            sim = Simulation(9)
+            sim.startSimulation()
+
         elif (inp == 2) :
             print("2")
         elif (inp == 0):
