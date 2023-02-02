@@ -9,6 +9,7 @@ class Timer:
         self.current        = START         # Current time   
         self.arrival        = INFINITY      # Next Arrival time
         self.completation   = INFINITY      # Next Completation time
+        # TODO serve un tempo di lavoro e l'ultimo evento?
     
     def UpdateCurrent(self,val):
         self.current = val
@@ -25,6 +26,8 @@ class Event:
         self.typ = typ          # Event type
         self.client = None      # Client TODO seve o no?
         self.identifier = id    # Identifier of set and server if completation TODO serve?? 
+    # TODO creare una funzione di init in base al tipo di evento?
+    
 
 
 

@@ -1,6 +1,6 @@
 from SystemConf import ClientType
 from TimeDef    import Event
-from lib.rngs   import *
+from lib.rngs   import plantSeeds,random,selectStream
 
 def GetRandom(stream:int) -> float:
     selectStream(stream)

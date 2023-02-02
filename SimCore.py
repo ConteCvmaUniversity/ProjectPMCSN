@@ -2,7 +2,7 @@
 from SystemConf import *
 from TimeDef    import Timer,Event,Area, EventType
 from Utility    import *
-from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty
+from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty , SimulationError
 
 class ServerSet:
 
@@ -70,6 +70,7 @@ class ServerSet:
         self.UpdateTimer()
         return ret
     
+    # Function that add client to set status (increment client.type number, number)
     def AddClient(self,cl:ClientType):
         self.status.AddClient(cl)
     
@@ -82,6 +83,7 @@ class ServerSet:
         
 
     def GetService(self,client,id,serverState):
+        
         ev = GetService(self.timer.current,client,id,serverState)
         self.AddEvent(ev)
         self.status.AddServedClient(client)
@@ -97,12 +99,18 @@ class ServerSet:
     
     
     # This function does not check the server status but schedule a queued job
-    def ScheduleNoPriority(self,serverId):
+    def ScheduleJob(self,serverId,priority = False):
+        # TODO tracciamo in qualche modo il tempo di lavoro che viene schedulato??
         server:Server = self.servers[serverId]
         try:
-            client = self.status.GetFirstClienQueueNotEmpty()
+            if (priority):
+                client = self.status.GetFirstClientQueueNotEmptyPriority()
+            else:
+                client = self.status.GetFirstClientQueueNotEmpty()
             serverNewState = self.metadata.clientToSStateMap[client]
-
+            if serverNewState == -1:
+                raise SimulationError("Server {} receive a client not admitted {}".format((self.identifier,serverId),client))
+            
             self.GetService(client,server.GetServerIdentifier(),serverNewState)
             #Update server state
             server.UpdateState(serverNewState,client)
@@ -124,28 +132,48 @@ class ServerSetStatus:
         self.completed = [0] * CLIENTTYPENUM            # Number of completed job
     
     def AddClient(self,cl:ClientType):
-        self.clients[cl["index"]]   += 1
+        self.clients[cl.value["index"]]   += 1
         self.number                 += 1
     
     def AddServedClient(self,cl:ClientType):
-        self.servedClients[cl["index"]] += 1
+        self.servedClients[cl.value["index"]] += 1
     
     def RemoveClient(self,cl:ClientType):
-        self.clients[cl["index"]]   -= 1
+        self.clients[cl.value["index"]]   -= 1
         self.number                 -= 1
     
     def IncrementCompleted(self,cl:ClientType):
-        self.completed[cl["index"]] += 1
+        self.completed[cl.value["index"]] += 1
 
-    def GetFirstClienQueueNotEmpty(self) -> ClientType:
+    # No priority defined for select the empty queue
+    def GetFirstClientQueueNotEmpty(self) -> ClientType:
         for typ in list(ClientType):
             if (self.__clientInQueue(typ) > 0 ) :
                 return typ
         # All queue are empty    
         raise AllQueueEmpty()
+    
+    # Ad hoc function for payment type selection
+    def GetFirstClientQueueNotEmptyPriority(self) -> ClientType:
+        priority_list   = filter(lambda item: item.value["pay"]== ClientPV.GRUPPO ,list(ClientType))
+        second_list     = filter(lambda item: item.value["pay"]== ClientPV.SINGOLO ,list(ClientType))
+
+        for typ in priority_list:
+            if (self.__clientInQueue(typ) > 0 ) :
+                return typ
+        
+        for typ in second_list:
+            if (self.__clientInQueue(typ) > 0 ) :
+                return typ
+
+        # All queue are empty    
+        raise AllQueueEmpty()   
+        
+
 
     def __clientInQueue(self,cl:ClientType):
-        ret = self.clients[cl["index"]] - self.servedClients[cl["index"]]
+        idx = cl.value["index"]
+        ret = self.clients[idx] - self.servedClients[idx]
         return ret
 
     
@@ -208,7 +236,7 @@ class Simulation:
             # First setup next arrival
 
             # Select the next event
-            self.next = self.getNextEvent()
+            self.next = self.__getNextEvent()
 
             nextIsArrival:bool = self.next.typ == EventType.ARRIVAL
             # Based on next event type select the right identifier
@@ -241,14 +269,15 @@ class Simulation:
                     idleId = selectedSet.GetIdleServerId()
                     if (idleId != -1):
                         # A free server it's available and at least one queue as job (we have an arrival)
-                        selectedSet.ScheduleNoPriority(idleId)
+                        selectedSet.ScheduleJob(idleId)
+                        
                 
                 else:
                     # Completation Event
                     selectedSet.CompletationEvent(client)
                     serverId = self.next.identifier[1]
                     # Try to schedule new work on this server
-                    selectedSet.ScheduleNoPriority(serverId)
+                    selectedSet.ScheduleJob(serverId)
 
                     # A completation in this set generate an event for set 2
                     # First generate a discard probability
@@ -265,27 +294,127 @@ class Simulation:
                 
             elif (setSelector == 2):
                 #Event for set 2
-                pass
-            
+
+                # Is an arrival 
+                if nextIsArrival:
+                    # Increment clients
+                    selectedSet.AddClient(client)
+
+                    # Schedule the arrival and generate completation event
+                    # If a server is free
+                    idleId = selectedSet.GetIdleServerId()
+                    if (idleId != -1):
+                        # A free server it's available and at least one queue as job (we have an arrival)
+                        selectedSet.ScheduleJob(idleId)
+                else:
+                    # Completation event
+                    selectedSet.CompletationEvent(client)
+                    serverId = self.next.identifier[1]
+                    selectedSet.ScheduleJob(serverId)
+
+                    clientType = client.value["type"]
+                    # A completation in this set can trigger a new arrival in the next sets based on client type
+                    if (clientType == ClientTV.SOCIO):
+                        # Generate an arrival for set 5 
+                        self.serverSets[4].GetArrivalByClient(client)
+                    elif (clientType == ClientTV.NEWMODULO):
+                        # Generate an arrival for set 4
+                        self.serverSets[3].GetArrivalByClient(client)
+                    elif (( clientType == ClientTV.NEWMODULO ) or ( clientType == ClientTV.NEWMODULO )):
+                        # Generate an arrival for set 3
+                        self.serverSets[2].GetArrivalByClient(client)
+
+            # END SET 2
+
             elif (setSelector == 3):
                 #Event for set 3
-                pass
+
+                # Is an arrival 
+                if nextIsArrival:
+                    # Increment clients
+                    selectedSet.AddClient(client)
+
+                    # Schedule the arrival and generate completation event
+                    # If a server is free
+                    idleId = selectedSet.GetIdleServerId()
+                    if (idleId != -1):
+                        # A free server it's available and at least one queue as job (we have an arrival)
+                        selectedSet.ScheduleJob(idleId)
+                else:
+                    # Completation event
+                    selectedSet.CompletationEvent(client)
+                    serverId = self.next.identifier[1]
+                    selectedSet.ScheduleJob(serverId)
+
+                    # All completation for this set only generate an arrival for set 4
+                    self.serverSets[3].GetArrivalByClient(client)
+
             
+            # END SET 3
+
             elif (setSelector == 4):
                 #Event for set 4
-                pass
+                # Is an arrival 
+                if nextIsArrival:
+                    # Increment clients
+                    selectedSet.AddClient(client)
+
+                    # Schedule the arrival and generate completation event
+                    # If a server is free
+                    idleId = selectedSet.GetIdleServerId()
+                    if (idleId != -1):
+                        # A free server it's available and at least one queue as job (we have an arrival)
+                        selectedSet.ScheduleJob(idleId)
+                else:
+                    # Completation event
+                    selectedSet.CompletationEvent(client)
+                    serverId = self.next.identifier[1]
+                    selectedSet.ScheduleJob(serverId)
+
+                    # All completation for this set only generate an arrival for set 4
+                    self.serverSets[3].GetArrivalByClient(client)
             
+            # END SET 4
+
             elif (setSelector == 5):
                 #Event for set 5
-                pass
+                # Is an arrival 
+                if nextIsArrival:
+                    # Increment clients
+                    selectedSet.AddClient(client)
+
+                    # Schedule the arrival and generate completation event
+                    # If a server is free
+                    idleId = selectedSet.GetIdleServerId()
+                    if (idleId != -1):
+                        # A free server it's available and at least one queue as job (we have an arrival)
+                        selectedSet.ScheduleJob(idleId,priority=True)
+                else:
+                    # Completation event
+                    selectedSet.CompletationEvent(client)
+                    serverId = self.next.identifier[1]
+                    selectedSet.ScheduleJob(serverId,priority=True)
+
+            # END SET 5
 
             else:
-                pass
+                raise SimulationError("Set Selector not in range val:{}".format(setSelector))
+
+            # if debug is on print update of simulation
+
+            if __debug__ :
+                self.printDebugUpdate()           
 
         #END WHILE
     
     # This function search next event from events list of the sets and pop it
-    def getNextEvent(self,priority=False) -> Event:
+    def __getNextEvent(self,priority=False) -> Event:
         #TODO da fare la funzione
         for elem in self.serverSets:
             pass
+
+    
+
+    def printDebugUpdate():
+        #TODO
+        pass

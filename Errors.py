@@ -7,3 +7,6 @@ class NoServerIdle(Exception):
 
 class AllQueueEmpty(Exception):
     pass
+
+class SimulationError(Exception):
+    pass
