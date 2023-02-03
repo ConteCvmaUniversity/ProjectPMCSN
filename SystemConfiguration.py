@@ -4,7 +4,7 @@ from TimeDef import STOP
 # GLOBAL VALUE
 simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
-arrivalRate             = (400/840)   
+arrivalRate             = (450/840)   
 
 
 class ClientTProb(Enum):
