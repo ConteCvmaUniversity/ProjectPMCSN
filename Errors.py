@@ -10,3 +10,6 @@ class AllQueueEmpty(Exception):
 
 class SimulationError(Exception):
     pass
+
+class NoEvent(Exception):
+    pass

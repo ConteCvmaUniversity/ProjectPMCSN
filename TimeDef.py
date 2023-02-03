@@ -36,11 +36,19 @@ class Event:
 # statistics for population
 class Area:
     def __init__(self,nQueue) -> None:
-        self.node       = [0.0] * nQueue 
-        self.queue      = [0.0] * nQueue
-        self.service    = [0.0] * nQueue
+        self.queue      = nQueue
+        #self.node       = [0.0] * nQueue 
+        #self.queue      = [0.0] * nQueue
+        #self.service    = [0.0] * nQueue
+        self.clients        = 0.0 
+        self.queue          = 0.0
+        self.service        = 0.0
     
-    def UpdateArea(self,globalTime,current,number):
-        self.node    += (globalTime - current) * number
-        self.queue   += (globalTime - current) * (number - 1)
-        self.service += (globalTime - current)
+    def UpdateArea(self,globalTime,current,number,service):
+        #for i in range(0,self.queue):
+            #self.node    [i] += (globalTime - current) * number 
+            #self.queue   [i] += (globalTime - current) * (number - 1) sbagliato
+            #self.service [i] += (globalTime - current) sbagliato
+        self.clients    += (globalTime - current) * number 
+        self.queue      += (globalTime - current) * (number - service) 
+        self.service    += (globalTime - current) * service

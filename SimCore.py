@@ -1,8 +1,8 @@
 # File whit Simulation core function
 from SystemConfiguration import *
-from TimeDef    import Timer,Event,Area, EventType
+from TimeDef    import Timer,Event,Area, EventType, INFINITY, START
 from Utility    import *
-from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty , SimulationError
+from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty , SimulationError, NoEvent
 
 class ServerSet:
 
@@ -27,21 +27,27 @@ class ServerSet:
         
     def GetArrivalForAllEvent(self):        
         for elem in list(ClientType):
-            ev:Event = GetArrival(elem,self.identifier,self.timer.arrival[elem.value["index"]])
-            print("Value ev: \n{}".format(ev))
+            # print("Time Arrival for all event: {}".format(self.timer.arrival[elem.value["index"]]))
+            ev:Event = GetArrival(elem,self.identifier,START)
+            # print("Value ev: \n{}".format(ev))
             self.AddEvent(ev)
         
     
     def GetArrivalByClient(self,cl:ClientType):
         # A new arrival can by added only if it's time is not over the limit
         ev:Event = GetArrival(cl,self.identifier,self.timer.arrival[cl.value["index"]])
-        if ev.time > self.metadata.simulationTime:
+        if ev.time < self.metadata.simulationTime:
             self.AddEvent(ev)
             
         else:
-            raise SimulationStop("New Arrival time largen than simulation Time val:{}".format(ev.time))
+            raise SimulationStop("New Arrival time largen than simulation Time val:{} ,stop: {}".format(ev.time,self.metadata.simulationTime))
     
-    
+    def StaticArrival(self,cl:ClientType,time):
+        ev = Event(EventType.ARRIVAL,self.identifier,cl,time)
+        # No check time
+        self.AddEvent(ev)
+            
+        
         
     def AddEvent(self,event:Event):
         self.events.append(event)
@@ -57,22 +63,29 @@ class ServerSet:
     
     def UpdateSetArea(self,globalTime):
         if self.status.number > 0:
-            self.area.UpdateArea(globalTime,self.timer.current)
+            self.area.UpdateArea(globalTime,self.timer.current,self.status.number,self.status.GetNumberInService())
 
     def UpdateCurrentTime(self,time):
         # TODO servono controlli su time?
         self.timer.UpdateCurrent(time)
 
     def NextEventTime(self):
-        return self.events[0].time
+        try:
+            return self.events[0].time
+        except IndexError:
+            raise NoEvent()
     
     def getNextEvent(self)->Event:
-        return self.events[0]
+        try:
+            return self.events[0]
+        except IndexError:
+            raise NoEvent()
     
     def popNextEvent(self)->Event:
-        ret = self.events.pop(0)
-        self.UpdateTimer()
-        return ret
+        try:
+            return self.events.pop(0)
+        except IndexError:
+            raise NoEvent()
     
     # Function that add client to set status (increment client.type number, number)
     def AddClient(self,cl:ClientType):
@@ -147,10 +160,13 @@ class ServerSetStatus:
             temp["client"] = self.clients[idx]
             temp["served"] = self.servedClients[idx]
             temp["completed"] = self.completed[idx]
-            temp["queue"] = self.__clientInQueue[elem]
+            temp["queue"] = self.__clientInQueue(elem)
 
             stats[elem] = temp
         return stats
+    
+    def GetNumberInService(self):
+        return sum(self.servedClients)
 
     
     def AddClient(self,cl:ClientType):
@@ -168,12 +184,20 @@ class ServerSetStatus:
         self.completed[cl.value["index"]] += 1
 
     # No priority defined for select the empty queue
+    # service more capient queue
     def GetFirstClientQueueNotEmpty(self) -> ClientType:
+        last = 0
+        retType = None
         for typ in list(ClientType):
-            if (self.__clientInQueue(typ) > 0 ) :
-                return typ
-        # All queue are empty    
-        raise AllQueueEmpty()
+            actual = self.__clientInQueue(typ)
+            if ( (actual > 0) and (actual > last) ) :
+                last = actual
+                retType = typ
+        if (last == 0):
+            # All queue are empty    
+            raise AllQueueEmpty()
+        else:
+            return retType
     
     # Ad hoc function for payment type selection
     def GetFirstClientQueueNotEmptyPriority(self) -> ClientType:
@@ -242,11 +266,13 @@ class Simulation:
         
     
     def startSimulation(self):
+        plantSeeds(self.seed)
+
         #TODO controllo setup e start del sistema GetArrival()
         self.serverSets[0].GetArrivalForAllEvent()
 
-        #TODO plant seeds??
-        plantSeeds(self.seed)
+        
+        
         
 
         while(  (self.continueSim) or                        \
@@ -260,8 +286,14 @@ class Simulation:
             # First setup next arrival
 
             # Select the next event
-            self.next = self.__getNextEvent()
-
+            #self.next = self.__getNextEvent()
+            try:
+                self.next = self.__getNextEvent()
+            except NoEvent as ex:
+                print("\nNo event found\n Continue sim :{}\nSet 1 job: {}\nSet 2 job: {}\nSet 3 job: {}\nSet 4 job: {}\nSet 5 job: {}\n" \
+                      .format(self.continueSim,self.serverSets[0].hasJob(),self.serverSets[1].hasJob(),self.serverSets[2].hasJob(),self.serverSets[3].hasJob(),self.serverSets[4].hasJob()))
+                raise
+            
             nextIsArrival:bool = self.next.typ == EventType.ARRIVAL
             # Based on next event type select the right identifier
             setSelector = self.next.identifier if nextIsArrival else self.next.identifier[0] # identifier of set from 1 to 5
@@ -271,11 +303,15 @@ class Simulation:
             selectedSet.UpdateSetArea(self.next.time)                   # update set area
             selectedSet.UpdateCurrentTime(self.next.time)               # update current value in set timer
 
+            #if (not self.continueSim):
+            #    print("Simulation reach stop but processing queue job:\n SET[{}], \nevenTypeArrival[{}], time: {}\n client:{}\n---------\n".format(selectedSet.identifier,nextIsArrival,self.next.time,client))
+
             if (setSelector == 1):
                 # Event for set 1
 
-                # Is an arrival 
-                if nextIsArrival:
+                
+                if (nextIsArrival) :
+                    
                     # Increment clients
                     selectedSet.AddClient(client)
 
@@ -309,7 +345,7 @@ class Simulation:
 
                     if (discardProb > probabilityDiscardSet1):
                         # schedule an arrival for set 2
-                        self.serverSets[1].GetArrivalByClient(client)
+                        self.serverSets[1].StaticArrival(client,self.next.time)
                     else:
                         # discard job
                         self.discarded += 1
@@ -340,13 +376,15 @@ class Simulation:
                     # A completation in this set can trigger a new arrival in the next sets based on client type
                     if (clientType == ClientTV.SOCIO):
                         # Generate an arrival for set 5 
-                        self.serverSets[4].GetArrivalByClient(client)
+                        self.serverSets[4].StaticArrival(client,self.next.time)
+
                     elif (clientType == ClientTV.NEWMODULO):
                         # Generate an arrival for set 4
-                        self.serverSets[3].GetArrivalByClient(client)
+                        self.serverSets[3].StaticArrival(client,self.next.time)
+
                     elif (( clientType == ClientTV.NEWMODULO ) or ( clientType == ClientTV.NEWMODULO )):
                         # Generate an arrival for set 3
-                        self.serverSets[2].GetArrivalByClient(client)
+                        self.serverSets[2].StaticArrival(client,self.next.time)
 
             # END SET 2
 
@@ -371,7 +409,7 @@ class Simulation:
                     selectedSet.ScheduleJob(serverId)
 
                     # All completation for this set only generate an arrival for set 4
-                    self.serverSets[3].GetArrivalByClient(client)
+                    self.serverSets[3].StaticArrival(client,self.next.time)
 
             
             # END SET 3
@@ -396,7 +434,7 @@ class Simulation:
                     selectedSet.ScheduleJob(serverId)
 
                     # All completation for this set only generate an arrival for set 4
-                    self.serverSets[3].GetArrivalByClient(client)
+                    self.serverSets[4].StaticArrival(client,self.next.time)
             
             # END SET 4
 
@@ -437,13 +475,32 @@ class Simulation:
     
     # This function search next event from events list of the sets and pop it
     def __getNextEvent(self,priority=False) -> Event:
-        #TODO da fare la funzione
-        for elem in self.serverSets:
-            pass
+        # search next event whit min time
+        lastTime = INFINITY
+        curSet:ServerSet= None
+
+        for set in self.serverSets:
+           
+            try:
+                searchTime = set.NextEventTime()
+                # print("Set num [{}] time: {}".format(set.identifier,searchTime))
+                if(searchTime < lastTime):
+                    curSet = set
+                    lastTime = searchTime
+            except NoEvent:
+                # This mean that there aren't event in set
+                continue
+        #print("Selected set[{}] whit time:{}".format(curSet.identifier,curSet.NextEventTime()))
+        if curSet == None:
+            raise NoEvent()
+        else:
+            return curSet.popNextEvent()
+            
+            
 
     
 
-    def __printDebugUpdate(event:Event,set:ServerSet):
+    def __printDebugUpdate(self,event:Event,set:ServerSet):
         print("\n--------------------Event Stats--------------------")
         typ = event.typ
         if (typ == EventType.ARRIVAL):
@@ -452,7 +509,7 @@ class Simulation:
             print("Completation event at set: {}, server: {}, client: {}\n".format(event.identifier[0],event.identifier[1],event.client))
         
         print("--------------------Set Stats--------------------")
-        print("Set time:\n\tCurrent\tArrival\tCompletation\n\t{}\t{}\t{}".format(set.timer.current,set.timer.arrival,set.timer.completation))
+        print("Set time:\n\tCurrent:\t{}\n\tArrival:\t{}\n\tCompletation:\t{}\n".format(set.timer.current,set.timer.arrival,set.timer.completation))
         statusStats = set.status.GetStats()
         setId = set.identifier
         print("Set [{}] numer of job: {} ".format(setId,statusStats["Total job"]))
