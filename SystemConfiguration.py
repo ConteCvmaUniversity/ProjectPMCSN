@@ -2,10 +2,21 @@ from enum import Enum
 from TimeDef import STOP
 
 # GLOBAL VALUE
-simulationTimeG = STOP
-probabilityDiscardSet1 = 0.01
+simulationTimeG         = STOP
+probabilityDiscardSet1  = 0.01
+arrivalRate             = (400/840)   
 
 
+class ClientTProb(Enum):
+    SOCIO       = 0.1
+    RINNOVO     = 0.2
+    NEWMODULO   = 0.2
+    NEWMAGG     = 0.2
+    NEWFAMILY   = 0.3
+
+class ClientPProb(Enum):
+    SINGOLO     = 0.35
+    GRUPPO      = 0.65
 
 
 # Enum for client type value
@@ -25,16 +36,16 @@ class ClientPV(Enum):
 
 # Client type according to documentation
 class ClientType(Enum):
-    SS      = {"index" : 0 , "type": ClientTV.SOCIO    ,  "pay": ClientPV.SINGOLO } 
-    SG      = {"index" : 1 , "type": ClientTV.SOCIO    ,  "pay": ClientPV.GRUPPO  }
-    RS      = {"index" : 2 , "type": ClientTV.RINNOVO  ,  "pay": ClientPV.SINGOLO }
-    RG      = {"index" : 3 , "type": ClientTV.RINNOVO  ,  "pay": ClientPV.GRUPPO  }
-    NMOS    = {"index" : 4 , "type": ClientTV.NEWMODULO,  "pay": ClientPV.SINGOLO }
-    NMOG    = {"index" : 5 , "type": ClientTV.NEWMODULO,  "pay": ClientPV.GRUPPO  }
-    NMAS    = {"index" : 6 , "type": ClientTV.NEWMAGG  ,  "pay": ClientPV.SINGOLO }
-    NMAG    = {"index" : 7 , "type": ClientTV.NEWMAGG  ,  "pay": ClientPV.GRUPPO  }
-    NFS     = {"index" : 8 , "type": ClientTV.NEWFAMILY,  "pay": ClientPV.SINGOLO }
-    NFG     = {"index" : 9 , "type": ClientTV.NEWFAMILY,  "pay": ClientPV.GRUPPO  }
+    SS      = {"index" : 0 , "type": ClientTV.SOCIO    ,  "pay": ClientPV.SINGOLO , "prob": ClientTProb.SOCIO     .value * ClientPProb.SINGOLO.value } 
+    SG      = {"index" : 1 , "type": ClientTV.SOCIO    ,  "pay": ClientPV.GRUPPO  , "prob": ClientTProb.SOCIO     .value * ClientPProb.GRUPPO .value }
+    RS      = {"index" : 2 , "type": ClientTV.RINNOVO  ,  "pay": ClientPV.SINGOLO , "prob": ClientTProb.RINNOVO   .value * ClientPProb.SINGOLO.value }
+    RG      = {"index" : 3 , "type": ClientTV.RINNOVO  ,  "pay": ClientPV.GRUPPO  , "prob": ClientTProb.RINNOVO   .value * ClientPProb.GRUPPO .value } 
+    NMOS    = {"index" : 4 , "type": ClientTV.NEWMODULO,  "pay": ClientPV.SINGOLO , "prob": ClientTProb.NEWMODULO .value * ClientPProb.SINGOLO.value } 
+    NMOG    = {"index" : 5 , "type": ClientTV.NEWMODULO,  "pay": ClientPV.GRUPPO  , "prob": ClientTProb.NEWMODULO .value * ClientPProb.GRUPPO .value }
+    NMAS    = {"index" : 6 , "type": ClientTV.NEWMAGG  ,  "pay": ClientPV.SINGOLO , "prob": ClientTProb.NEWMAGG   .value * ClientPProb.SINGOLO.value } 
+    NMAG    = {"index" : 7 , "type": ClientTV.NEWMAGG  ,  "pay": ClientPV.GRUPPO  , "prob": ClientTProb.NEWMAGG   .value * ClientPProb.GRUPPO .value }
+    NFS     = {"index" : 8 , "type": ClientTV.NEWFAMILY,  "pay": ClientPV.SINGOLO , "prob": ClientTProb.NEWFAMILY .value * ClientPProb.SINGOLO.value }
+    NFG     = {"index" : 9 , "type": ClientTV.NEWFAMILY,  "pay": ClientPV.GRUPPO  , "prob": ClientTProb.NEWFAMILY .value * ClientPProb.GRUPPO .value } 
 
 
 CLIENTTYPENUM = len(ClientType)
@@ -64,6 +75,28 @@ class ServerStateType5(ServerStateType):
     SINGOLO     = 1
     GRUPPO      = 2
 
+# Classes that define service time (clone of state)
+class ServerServiceTime1(Enum):
+    BUSY    = 0.5
+    FAMILY  = 1
+
+class ServerServiceTime2(Enum):
+    BUSY    = 0.5
+    FAMILY  = 1
+
+class ServerServiceTime3(Enum):
+    MAGG    = 4
+    FAMILY  = 6
+
+class ServerServiceTime4(Enum):
+    COMPLETE    = 3
+    MAGG        = 7
+    FAMILY      = 9
+
+class ServerServiceTime5(Enum):
+    SINGOLO     = 1.5
+    GRUPPO      = 0.5
+
 class ServerNumber(Enum):
     SET1    = 2 
     SET2    = 3
@@ -72,6 +105,8 @@ class ServerNumber(Enum):
     SET5    = 3
 
 SERVERNUMBER = 14
+
+
 #
 # Metadata for server set
 #
@@ -141,16 +176,27 @@ class SetMetadata4(SetMetadata):
     serverStateType = ServerStateType4
     serverEventNumber = 3
     extraNumberOfQueue = 3
+    #clientToSStateMap = {   ClientType.SS   : -1                        ,                    \
+    #                        ClientType.SG   : -1                        ,                    \
+    #                        ClientType.RS   : ServerStateType4.COMPLETE ,                    \
+    #                        ClientType.RG   : ServerStateType4.COMPLETE ,                    \
+    #                        ClientType.NMOS : ServerStateType4.COMPLETE ,                    \
+    #                        ClientType.NMOG : ServerStateType4.COMPLETE ,                    \
+    #                        ClientType.NMAS : ServerStateType4.MAGG     ,                    \
+    #                        ClientType.NMAG : ServerStateType4.MAGG     ,                    \
+    #                        ClientType.NFS  : ServerStateType4.FAMILY   ,                    \
+    #                        ClientType.NFG  : ServerStateType4.FAMILY   }
+    
     clientToSStateMap = {   ClientType.SS   : -1                        ,                    \
                             ClientType.SG   : -1                        ,                    \
                             ClientType.RS   : ServerStateType4.COMPLETE ,                    \
                             ClientType.RG   : ServerStateType4.COMPLETE ,                    \
                             ClientType.NMOS : ServerStateType4.COMPLETE ,                    \
                             ClientType.NMOG : ServerStateType4.COMPLETE ,                    \
-                            ClientType.NMAS : ServerStateType4.MAGG     ,                    \
-                            ClientType.NMAG : ServerStateType4.MAGG     ,                    \
-                            ClientType.NFS  : ServerStateType4.FAMILY   ,                    \
-                            ClientType.NFG  : ServerStateType4.FAMILY   }
+                            ClientType.NMAS : ServerStateType4.COMPLETE ,                    \
+                            ClientType.NMAG : ServerStateType4.COMPLETE ,                    \
+                            ClientType.NFS  : ServerStateType4.COMPLETE ,                    \
+                            ClientType.NFG  : ServerStateType4.COMPLETE }
 
 class SetMetadata5(SetMetadata):
     numberOfQueue = 2
