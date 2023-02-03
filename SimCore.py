@@ -3,6 +3,7 @@ from SystemConfiguration import *
 from TimeDef    import Timer,Event,Area, EventType, INFINITY, START
 from Utility    import *
 from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty , SimulationError, NoEvent
+import time
 
 class ServerSet:
 
@@ -155,8 +156,9 @@ class ServerSetStatus:
         stats["Total job"] = self.number
         for elem in list(ClientType):
             temp = {}
-            temp["type"] = elem
             idx = elem.value["index"]
+            temp["type"] = idx
+            
             temp["client"] = self.clients[idx]
             temp["served"] = self.servedClients[idx]
             temp["completed"] = self.completed[idx]
@@ -170,14 +172,15 @@ class ServerSetStatus:
 
     
     def AddClient(self,cl:ClientType):
-        self.clients[cl.value["index"]]   += 1
-        self.number                 += 1
+        self.clients[cl.value["index"]]     += 1
+        self.number                         += 1
     
     def AddServedClient(self,cl:ClientType):
         self.servedClients[cl.value["index"]] += 1
     
     def RemoveClient(self,cl:ClientType):
         self.clients[cl.value["index"]]   -= 1
+        self.servedClients[cl.value["index"]] -= 1  
         self.number                 -= 1
     
     def IncrementCompleted(self,cl:ClientType):
@@ -292,7 +295,7 @@ class Simulation:
             except NoEvent as ex:
                 print("\nNo event found\n Continue sim :{}\nSet 1 job: {}\nSet 2 job: {}\nSet 3 job: {}\nSet 4 job: {}\nSet 5 job: {}\n" \
                       .format(self.continueSim,self.serverSets[0].hasJob(),self.serverSets[1].hasJob(),self.serverSets[2].hasJob(),self.serverSets[3].hasJob(),self.serverSets[4].hasJob()))
-                raise
+                #raise
             
             nextIsArrival:bool = self.next.typ == EventType.ARRIVAL
             # Based on next event type select the right identifier
@@ -513,6 +516,7 @@ class Simulation:
         statusStats = set.status.GetStats()
         setId = set.identifier
         print("Set [{}] numer of job: {} ".format(setId,statusStats["Total job"]))
+        
 
         for elem in list(ClientType):
             # TODO better print
@@ -521,3 +525,4 @@ class Simulation:
         # TODO need server stats??
 
         print("\n--------------------End Stats--------------------")
+        #time.sleep(1)
