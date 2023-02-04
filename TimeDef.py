@@ -38,7 +38,7 @@ class Event:
 # statistics for population
 class Area:
     def __init__(self,nQueue) -> None:
-        self.queue      = nQueue
+        self.queue          = nQueue
         self.clients        = 0.0 
         self.queue          = 0.0
         self.service        = 0.0

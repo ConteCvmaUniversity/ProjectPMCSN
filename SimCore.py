@@ -18,6 +18,33 @@ class ServerSet:
         self.timer = Timer()
         
     
+    def getStatistics(self) -> dict:
+        stat = {}
+        appo = {}
+        completations = sum(self.status.completed)
+        current = self.timer.current
+        stat ["time"]           = current
+        stat ["completations"]  = completations
+        for elem in list(ClientType):
+            idx = elem.value["index"]
+            div = self.status.completed[idx]
+            if div != 0 :
+                appo[elem] = self.timer.arrival[idx] / div
+            else:
+                appo[elem] = 0
+        
+        # From book notation
+        stat ["r"]  = appo
+        
+        stat ["s"]  = self.area.service / completations
+        stat ["d"]  = self.area.queue   / completations
+        stat ["w"]  = self.area.clients / completations   
+    
+        stat ["l"]  = self.area.clients / current
+        stat ["q"]  = self.area.queue   / current
+        stat ["x"]  = self.area.service / current
+
+        return stat
 
 
     def hasJob(self) -> bool:
@@ -380,11 +407,11 @@ class Simulation:
                         # Generate an arrival for set 5 
                         self.serverSets[4].StaticArrival(client,self.next.time)
 
-                    elif (clientType == ClientTV.NEWMODULO):
+                    elif ((clientType == ClientTV.RINNOVO) or (clientType == ClientTV.NEWMODULO) ):
                         # Generate an arrival for set 4
                         self.serverSets[3].StaticArrival(client,self.next.time)
 
-                    elif (( clientType == ClientTV.NEWMODULO ) or ( clientType == ClientTV.NEWMODULO )):
+                    elif (( clientType == ClientTV.NEWMAGG ) or ( clientType == ClientTV.NEWFAMILY )):
                         # Generate an arrival for set 3
                         self.serverSets[2].StaticArrival(client,self.next.time)
 
@@ -472,7 +499,8 @@ class Simulation:
         #END WHILE
 
         # TODO caso stazionario
-
+        if __debug__ :
+            self.__printStatistics()
         # TODO 
     
     # This function search next event from events list of the sets and pop it
@@ -523,5 +551,25 @@ class Simulation:
         
         # TODO need server stats??
 
-        print("\n--------------------End Stats--------------------")
+        print("\n--------------------End Stats--------------------\n")
         #time.sleep(1)
+
+    def __printStatistics(self):
+        print("\n--------------------Simulation ende stats--------------------")
+        set:ServerSet = None
+        for set in self.serverSets:
+            populationStats = set.getStatistics()
+           
+            print("\nSET [{}] STATISTICS REPORT".format(set.identifier))
+            print("\tCompletation time          :{:10.2f}".format(populationStats["time"]))
+            print("\tNumber of completation     :{:10.2f}".format(populationStats["completations"]))
+            for elem in list(ClientType):
+                temp = populationStats["r"][elem]
+                print("\tAvarage interarrival time for client({})       :{:10.2f}".format(elem,temp))
+            print("\tAvarage service time       :{:10.2f}".format(populationStats["s"]))
+            print("\tAvarage delay              :{:10.2f}".format(populationStats["d"]))
+            print("\tAvarage wait               :{:10.2f}".format(populationStats["w"]))
+            print("\tAvarage number in set      :{:10.2f}".format(populationStats["l"]))
+            print("\tAvarage number in queue    :{:10.2f}".format(populationStats["q"]))
+            print("\tAvarage number in service  :{:10.2f}".format(populationStats["x"]))
+            print("\n.........................................................\n")
