@@ -20,7 +20,7 @@ class ServerSet:
     
     def getStatistics(self) -> dict:
         stat = {}
-        appo = {}
+        temp = {}
         completations = sum(self.status.completed)
         current = self.timer.current
         stat ["time"]           = current
@@ -29,12 +29,12 @@ class ServerSet:
             idx = elem.value["index"]
             div = self.status.completed[idx]
             if div != 0 :
-                appo[elem] = self.timer.arrival[idx] / div
+                temp[elem] = self.timer.arrival[idx] / div
             else:
-                appo[elem] = 0
+                temp[elem] = 0
         
         # From book notation
-        stat ["r"]  = appo
+        stat ["r"]  = temp
         
         stat ["s"]  = self.area.service / completations
         stat ["d"]  = self.area.queue   / completations
@@ -531,14 +531,15 @@ class Simulation:
     
 
     def __printDebugUpdate(self,event:Event,set:ServerSet):
-        print("\n--------------------Event Stats--------------------")
+        print("\n--------------------Event info--------------------")
         typ = event.typ
         if (typ == EventType.ARRIVAL):
-            print("Arrival event at set: {}, client: {}\n".format(event.identifier,event.client))
+            print("\nArrival event at set: {} \n\tclient: {}\n".format(event.identifier,event.client))
         else:
-            print("Completation event at set: {}, server: {}, client: {}\n".format(event.identifier[0],event.identifier[1],event.client))
+            serveridx = event.identifier[1]
+            print("\nCompletation event at set: {}\n\t server: {}\n\t client: {}\n\t status: {}\n".format(event.identifier[0],serveridx,event.client,set.servers[serveridx].state))
         
-        print("--------------------Set Stats--------------------")
+        print("          ------------Set info-------------")
         print("Set time:\n\tCurrent:\t{}\n\tArrival:\t{}\n\tCompletation:\t{}\n".format(set.timer.current,set.timer.arrival,set.timer.completation))
         statusStats = set.status.GetStats()
         setId = set.identifier
@@ -547,25 +548,30 @@ class Simulation:
 
         for elem in list(ClientType):
             # TODO better print
-            print("{}".format(statusStats[elem]))
+            print("\t{}".format(statusStats[elem]))
         
         # TODO need server stats??
 
-        print("\n--------------------End Stats--------------------\n")
+        print("\n--------------------End info--------------------\n")
         #time.sleep(1)
 
     def __printStatistics(self):
-        print("\n--------------------Simulation ende stats--------------------")
+        print("\n--------------------Simulation stats--------------------")
+        print("\n SISTEM DISCARDED clients are : {}".format(self.discarded))
+
+        print("\n........................Set stats.......................\n")
         set:ServerSet = None
         for set in self.serverSets:
             populationStats = set.getStatistics()
            
             print("\nSET [{}] STATISTICS REPORT".format(set.identifier))
-            print("\tCompletation time          :{:10.2f}".format(populationStats["time"]))
+            print("\n\tCompletation time          :{:10.2f}".format(populationStats["time"]))
             print("\tNumber of completation     :{:10.2f}".format(populationStats["completations"]))
+            print("")
             for elem in list(ClientType):
                 temp = populationStats["r"][elem]
-                print("\tAvarage interarrival time for client({})       :{:10.2f}".format(elem,temp))
+                print("\tAvarage interarrival time for client ({:4})  :{:7.2f}".format(elem.name,temp))
+            print("")
             print("\tAvarage service time       :{:10.2f}".format(populationStats["s"]))
             print("\tAvarage delay              :{:10.2f}".format(populationStats["d"]))
             print("\tAvarage wait               :{:10.2f}".format(populationStats["w"]))
