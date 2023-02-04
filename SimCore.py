@@ -252,12 +252,11 @@ class Simulation:
         # Initialize simulation state
         
         self.seed = seed
-        self.clock = Timer()        # Global clock TODO serve il global clock
+        # self.clock = Timer()        # Global clock TODO serve il global clock
         self.continueSim = True
         self.serverSets = []
         self.next = None            # Next Event
         self.discarded = 0
-        #TODO remove ? self.current = None         # Current Event
         self.reset_initial_state()
 
     def reset_initial_state(self):

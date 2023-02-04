@@ -8,8 +8,8 @@ INFINITY =  (100.0 * STOP)      # must be much larger than STOP  */
 class Timer:
     def __init__(self) -> None:
         self.current        = START                           # Current time   
-        self.arrival        = [INFINITY] * SystemConfiguration.CLIENTTYPENUM      # Next Arrival time
-        self.completation   = [INFINITY] * SystemConfiguration.CLIENTTYPENUM      # Next Completation time
+        self.arrival        = [INFINITY] * SystemConfiguration.CLIENTTYPENUM      # Last Arrival time
+        self.completation   = [INFINITY] * SystemConfiguration.CLIENTTYPENUM      # Last Completation time
         
     
     def UpdateCurrent(self,val):
@@ -27,6 +27,8 @@ class Event:
         self.typ = typ          # Event type
         self.client = client    # Client 
         self.identifier = id    # Identifier of set and server if completation
+
+
     # TODO creare una funzione di init in base al tipo di evento?
     
 
@@ -37,18 +39,20 @@ class Event:
 class Area:
     def __init__(self,nQueue) -> None:
         self.queue      = nQueue
-        #self.node       = [0.0] * nQueue 
-        #self.queue      = [0.0] * nQueue
-        #self.service    = [0.0] * nQueue
         self.clients        = 0.0 
         self.queue          = 0.0
         self.service        = 0.0
+
+        #self.node       = [0.0] * nQueue 
+        #self.queue      = [0.0] * nQueue
+        #self.service    = [0.0] * nQueue
     
     def UpdateArea(self,globalTime,current,number,service):
+        self.clients    += (globalTime - current) * number 
+        self.queue      += (globalTime - current) * (number - service) 
+        self.service    += (globalTime - current) * service
+
         #for i in range(0,self.queue):
             #self.node    [i] += (globalTime - current) * number 
             #self.queue   [i] += (globalTime - current) * (number - 1) sbagliato
             #self.service [i] += (globalTime - current) sbagliato
-        self.clients    += (globalTime - current) * number 
-        self.queue      += (globalTime - current) * (number - service) 
-        self.service    += (globalTime - current) * service
