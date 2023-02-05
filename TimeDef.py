@@ -1,9 +1,10 @@
 from enum import Enum
 import SystemConfiguration
 
+# Default value
 START =        0.0              # initial time                   */
-STOP  =        840              # terminal (close the door) time */
-INFINITY =  (100.0 * STOP)      # must be much larger than STOP  */
+STOP  =        420              # terminal (close the door) time */
+INFINITY =  (1000 * STOP)       # must be much larger than STOP  */
 
 class Timer:
     def __init__(self) -> None:
@@ -56,3 +57,8 @@ class Area:
             #self.node    [i] += (globalTime - current) * number 
             #self.queue   [i] += (globalTime - current) * (number - 1) sbagliato
             #self.service [i] += (globalTime - current) sbagliato
+    
+    def resetArea(self):
+        self.clients        = 0.0 
+        self.queue          = 0.0
+        self.service        = 0.0

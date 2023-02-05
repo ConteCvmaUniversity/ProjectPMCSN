@@ -4,10 +4,11 @@ from TimeDef    import Timer,Event,Area, EventType, INFINITY, START
 from Utility    import *
 from Errors     import SimulationStop,NoServerIdle, AllQueueEmpty , SimulationError, NoEvent
 import time
+import csv
 
 class ServerSet:
 
-    def __init__(self,id:int,numServer:int) -> None:
+    def __init__(self,id:int,numServer:int,simulationTime) -> None:
         self.identifier = id    # identifier of the server set
         self.metadata = FactorySetMetadata().getMetadata(id)    # metadata of the set
         self.status = ServerSetStatus() # status rapresentation of the set
@@ -16,13 +17,24 @@ class ServerSet:
         self.events = [] # List of event in set can be arrival or a server completation 
         self.servers = [Server(self.identifier,i) for i in range(0,self.channels)] 
         self.timer = Timer()
+        if simulationTime != None:
+            self.metadata.simulationTime = simulationTime
+        
+        if __debug__:
+            print("Simulation time: {}".format(self.metadata.simulationTime))
+    
+    def resetSetForBatch(self):
+        self.status.resetForBatch()
+        self.area.resetArea()
         
     
-    def getStatistics(self) -> dict:
+    def getStatistics(self,batchTime=0.0) -> dict:
         stat = {}
         temp = {}
         completations = sum(self.status.completed)
-        current = self.timer.current
+
+        current = self.timer.current - batchTime # Batch time always 0 if not specified in function call
+        
         stat ["time"]           = current
         stat ["completations"]  = completations
         for elem in list(ClientType):
@@ -39,13 +51,18 @@ class ServerSet:
         stat ["s"]  = self.area.service / completations
         stat ["d"]  = self.area.queue   / completations
         stat ["w"]  = self.area.clients / completations   
-    
+
         stat ["l"]  = self.area.clients / current
         stat ["q"]  = self.area.queue   / current
         stat ["x"]  = self.area.service / current
 
         return stat
 
+    def hasJob(self) -> bool:
+        if self.status.number > 0:
+            return True
+        else:
+            return False
 
     def hasEvent(self) -> bool:
         if len(self.events) > 0:
@@ -178,6 +195,9 @@ class ServerSetStatus:
         self.number = 0                                 # Number of job in set
         self.completed = [0] * CLIENTTYPENUM            # Number of completed job
     
+    def resetForBatch(self):
+        self.completed = [0] * CLIENTTYPENUM
+    
     def GetStats(self) -> dict:
         stats = {}
         stats["Total job"] = self.number
@@ -275,33 +295,35 @@ class Server:
 
 
 class Simulation:
-    def __init__(self,seed) -> None:
+    def __init__(self,seed,simulationTime=None) -> None:
         # Initialize simulation state
-        
+                
+        self.reset_initial_state(seed,simulationTime)
+
+    def reset_initial_state(self,seed,simulationTime):
         self.seed = seed
-        # self.clock = Timer()        # Global clock TODO serve il global clock
         self.continueSim = True
         self.serverSets = []
         self.next = None            # Next Event
         self.discarded = 0
-        self.reset_initial_state()
-
-    def reset_initial_state(self):
-        self.serverSets.append( ServerSet(1, ServerNumber.SET1.value) ) 
-        self.serverSets.append( ServerSet(2, ServerNumber.SET2.value) ) 
-        self.serverSets.append( ServerSet(3, ServerNumber.SET3.value) ) 
-        self.serverSets.append( ServerSet(4, ServerNumber.SET4.value) ) 
-        self.serverSets.append( ServerSet(5, ServerNumber.SET5.value) )
+        #self.completation = [0] * CLIENTTYPENUM
+        self.serverSets.append( ServerSet(1, ServerNumber.SET1.value , simulationTime) ) 
+        self.serverSets.append( ServerSet(2, ServerNumber.SET2.value , simulationTime) ) 
+        self.serverSets.append( ServerSet(3, ServerNumber.SET3.value , simulationTime) ) 
+        self.serverSets.append( ServerSet(4, ServerNumber.SET4.value , simulationTime) ) 
+        self.serverSets.append( ServerSet(5, ServerNumber.SET5.value , simulationTime) )
         
     
-    def startSimulation(self):
+    def startSimulation(self,stationary=False,batch=None):
+        localTime = time.strftime("%H:%M:%S", time.localtime())
+        print(localTime)
         plantSeeds(self.seed)
 
-        #TODO controllo setup e start del sistema GetArrival()
+        
         self.serverSets[0].GetArrivalForAllEvent()
 
-        
-        
+        if stationary:
+            batch_index = 0   
         
 
         while(  (self.continueSim) or                        \
@@ -487,6 +509,8 @@ class Simulation:
                     serverId = self.next.identifier[1]
                     selectedSet.ScheduleJob(serverId,priority=True)
 
+                    #self.completation[client.value["index"]] += 1
+
             # END SET 5
 
             else:
@@ -495,14 +519,43 @@ class Simulation:
             # if debug is on print update of simulation
 
             if __debug__ :
-                self.__printDebugUpdate(self.next,selectedSet)           
+                self.__printDebugUpdate(self.next,selectedSet)
 
+            if stationary:
+                # if a batch its terminated compute statistics and reset
+                
+                if (sum(self.serverSets[0].status.completed) == (batch[0])):
+                    # compute stats
+                    set:ServerSet = None
+                    for set in self.serverSets:
+                        statusStats = set.getStatistics(batchTime = batch[0] * batch_index)
+                        
+                        stringName = "Set{}_{}.csv".format(set.identifier,localTime)
+                        
+                        path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
+                        self.__saveStatsOnFile(statusStats,path) 
+
+
+                    # reset
+                    batch_index += 1
+                    self.__resetForBatch()
+                    
         #END WHILE
 
         # TODO caso stazionario
+        if stationary:
+            # compute final stationary stats
+            set:ServerSet = None
+            for set in self.serverSets:
+                statusStats = set.getStatistics(batchTime = batch[0] * (batch_index - 1))
+                
+                stringName = "Set{}_{}.csv".format(set.identifier,localTime)
+                path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
+                self.__saveStatsOnFile(statusStats,path)
+
         if __debug__ :
             self.__printStatistics()
-        # TODO 
+         
     
     # This function search next event from events list of the sets and pop it
     def __getNextEvent(self,priority=False) -> Event:
@@ -528,6 +581,21 @@ class Simulation:
             return curSet.popNextEvent()
             
             
+    def __resetForBatch(self):
+        set:ServerSet = None
+        for set in self.serverSets:
+            set.resetSetForBatch()
+
+    def __saveStatsOnFile(self,stats:dict,filePath):
+        fdname= ["time","completations","s","d","w","l","q","x"]
+        
+        with open(filePath,'a+') as f:
+            writer = csv.DictWriter(f,fieldnames=fdname,delimiter=',',lineterminator='\n')
+            if f.tell()== 0:
+                writer.writeheader()
+            stats.pop("r")
+            writer.writerow(stats)
+        
 
     
 
@@ -535,10 +603,10 @@ class Simulation:
         print("\n--------------------Event info--------------------")
         typ = event.typ
         if (typ == EventType.ARRIVAL):
-            print("\nArrival event at set: {} \n\tclient: {} -[{}]\n".format(event.identifier,event.client,event.client.value["index"]))
+            print("\nArrival event at set: {} \n\tclient: {}  [{}]\n".format(event.identifier,event.client,event.client.value["index"]))
         else:
             serveridx = event.identifier[1]
-            print("\nCompletation event at set: {}\n\t server: {}\n\t client: {}-[{}]\n\t status: {}\n".format(event.identifier[0],serveridx,event.client,\
+            print("\nCompletation event at set: {}\n\t server: {}\n\t client: {}  [{}]\n\t status: {}\n".format(event.identifier[0],serveridx,event.client,\
                                                                                                                event.client.value["index"],set.servers[serveridx].state))
         
         print("          ------------Set info-------------")

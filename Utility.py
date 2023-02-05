@@ -111,11 +111,11 @@ def __GetServiceSet1(time,clientType : ClientType ,Identifier,serverState) -> Ev
     event = None
     typ = EventType.COMPLETATION
     if (serverState == ServerStateType1.BUSY):
-        mVal = (1/ServerServiceTime1.BUSY.value)
+        mVal = (ServerServiceTime1.BUSY.value)
         event = __EventCreationExp(typ,__BUSY1_STREAM,mVal,time,clientType,Identifier)
 
     elif (serverState == ServerStateType1.FAMILY):
-        mVal = (1/ServerServiceTime1.FAMILY.value)
+        mVal = (ServerServiceTime1.FAMILY.value)
         event = __EventCreationExp(typ,__FAM1_STREAM,mVal,time,clientType,Identifier)
 
 
@@ -125,11 +125,11 @@ def __GetServiceSet2(time,clientType : ClientType ,Identifier,serverState) -> Ev
     event = None
     typ = EventType.COMPLETATION
     if (serverState == ServerStateType2.BUSY):
-        mVal = (1/ServerServiceTime2.BUSY.value)
+        mVal = (ServerServiceTime2.BUSY.value)
         event = __EventCreationExp(typ,__BUSY2_STREAM,mVal,time,clientType,Identifier)
 
     elif (serverState == ServerStateType2.FAMILY):
-        mVal = (1/ServerServiceTime2.FAMILY.value)
+        mVal = (ServerServiceTime2.FAMILY.value)
         event = __EventCreationExp(typ,__FAM2_STREAM,mVal,time,clientType,Identifier)
 
     return event
@@ -138,11 +138,11 @@ def __GetServiceSet3(time,clientType : ClientType ,Identifier,serverState) -> Ev
     event = None
     typ = EventType.COMPLETATION
     if (serverState == ServerStateType3.MAGG):
-        mVal = (1/ServerServiceTime3.MAGG.value)
+        mVal = (ServerServiceTime3.MAGG.value)
         event = __EventCreationExp(typ,__MAG3_STREAM,mVal,time,clientType,Identifier)
 
     elif (serverState == ServerStateType3.FAMILY):
-        mVal = (1/ServerServiceTime3.FAMILY.value)
+        mVal = (ServerServiceTime3.FAMILY.value)
         event = __EventCreationExp(typ,__FAM3_STREAM,mVal,time,clientType,Identifier)
 
     return event
@@ -152,15 +152,15 @@ def __GetServiceSet4(time,clientType : ClientType ,Identifier,serverState) -> Ev
     typ = EventType.COMPLETATION
 
     if (serverState == ServerStateType4.COMPLETE):
-        mVal = (1/ServerServiceTime4.COMPLETE.value)
+        mVal = (ServerServiceTime4.COMPLETE.value)
         event = __EventCreationExp(typ,__COM4_STREAM,mVal,time,clientType,Identifier)
 
     elif (serverState == ServerStateType4.MAGG):
-        mVal = (1/ServerServiceTime4.MAGG.value)
+        mVal = (ServerServiceTime4.MAGG.value)
         event = __EventCreationExp(typ,__MAG4_STREAM,mVal,time,clientType,Identifier)
 
     elif (serverState == ServerStateType4.FAMILY):
-        mVal = (1/ServerServiceTime4.FAMILY.value)
+        mVal = (ServerServiceTime4.FAMILY.value)
         event = __EventCreationExp(typ,__FAM4_STREAM,mVal,time,clientType,Identifier)
 
     return event
@@ -169,11 +169,11 @@ def __GetServiceSet5(time,clientType : ClientType ,Identifier,serverState) -> Ev
     event = None
     typ = EventType.COMPLETATION
     if (serverState == ServerStateType5.SINGOLO):
-        mVal = (1/ServerServiceTime5.SINGOLO.value)
+        mVal = (ServerServiceTime5.SINGOLO.value)
         event = __EventCreationExp(typ,__SIN5_STREAM,mVal,time,clientType,Identifier)
 
     elif (serverState == ServerStateType5.GRUPPO):
-        mVal = (1/ServerServiceTime5.GRUPPO.value)
+        mVal = (ServerServiceTime5.GRUPPO.value)
         event = __EventCreationExp(typ,__GRU5_STREAM,mVal,time,clientType,Identifier)
 
 

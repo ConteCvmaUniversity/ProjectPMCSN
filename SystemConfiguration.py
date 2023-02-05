@@ -1,18 +1,21 @@
 from enum import Enum
 from TimeDef import STOP
+import os
+
+ROOT_DIR = os.path.dirname(__file__)
 
 # GLOBAL VALUE
 simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
-arrivalRate             = (450/840)   
+arrivalRate             = (450/STOP)   
 
 
 class ClientTProb(Enum):
-    SOCIO       = 0.1
-    RINNOVO     = 0.2
+    SOCIO       = 0.05
+    RINNOVO     = 0.1
     NEWMODULO   = 0.2
-    NEWMAGG     = 0.2
-    NEWFAMILY   = 0.3
+    NEWMAGG     = 0.25
+    NEWFAMILY   = 0.4
 
 class ClientPProb(Enum):
     SINGOLO     = 0.35
@@ -99,12 +102,12 @@ class ServerServiceTime5(Enum):
 
 class ServerNumber(Enum):
     SET1    = 2 
-    SET2    = 3
+    SET2    = 2
     SET3    = 3
     SET4    = 3
-    SET5    = 3
+    SET5    = 2
 
-SERVERNUMBER = 14
+SERVERNUMBER = 10
 
 
 #
