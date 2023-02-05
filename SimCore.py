@@ -47,8 +47,8 @@ class ServerSet:
         return stat
 
 
-    def hasJob(self) -> bool:
-        if self.status.number > 0:
+    def hasEvent(self) -> bool:
+        if len(self.events) > 0:
             return True
         else:
             return False
@@ -305,11 +305,11 @@ class Simulation:
         
 
         while(  (self.continueSim) or                        \
-                (self.serverSets[0].hasJob() > 0) or    \
-                (self.serverSets[1].hasJob() > 0) or    \
-                (self.serverSets[2].hasJob() > 0) or    \
-                (self.serverSets[3].hasJob() > 0) or    \
-                (self.serverSets[4].hasJob() > 0)       \
+                (self.serverSets[0].hasEvent() > 0) or    \
+                (self.serverSets[1].hasEvent() > 0) or    \
+                (self.serverSets[2].hasEvent() > 0) or    \
+                (self.serverSets[3].hasEvent() > 0) or    \
+                (self.serverSets[4].hasEvent() > 0)       \
              ):
             
             # First setup next arrival
@@ -320,7 +320,7 @@ class Simulation:
                 self.next = self.__getNextEvent()
             except NoEvent as ex:
                 print("\nNo event found\n Continue sim :{}\nSet 1 job: {}\nSet 2 job: {}\nSet 3 job: {}\nSet 4 job: {}\nSet 5 job: {}\n" \
-                      .format(self.continueSim,self.serverSets[0].hasJob(),self.serverSets[1].hasJob(),self.serverSets[2].hasJob(),self.serverSets[3].hasJob(),self.serverSets[4].hasJob()))
+                      .format(self.continueSim,self.serverSets[0].hasEvent(),self.serverSets[1].hasEvent(),self.serverSets[2].hasEvent(),self.serverSets[3].hasEvent(),self.serverSets[4].hasEvent()))
                 #raise
             
             nextIsArrival:bool = self.next.typ == EventType.ARRIVAL
@@ -409,6 +409,7 @@ class Simulation:
 
                     elif ((clientType == ClientTV.RINNOVO) or (clientType == ClientTV.NEWMODULO) ):
                         # Generate an arrival for set 4
+                        
                         self.serverSets[3].StaticArrival(client,self.next.time)
 
                     elif (( clientType == ClientTV.NEWMAGG ) or ( clientType == ClientTV.NEWFAMILY )):
@@ -534,10 +535,11 @@ class Simulation:
         print("\n--------------------Event info--------------------")
         typ = event.typ
         if (typ == EventType.ARRIVAL):
-            print("\nArrival event at set: {} \n\tclient: {}\n".format(event.identifier,event.client))
+            print("\nArrival event at set: {} \n\tclient: {} -[{}]\n".format(event.identifier,event.client,event.client.value["index"]))
         else:
             serveridx = event.identifier[1]
-            print("\nCompletation event at set: {}\n\t server: {}\n\t client: {}\n\t status: {}\n".format(event.identifier[0],serveridx,event.client,set.servers[serveridx].state))
+            print("\nCompletation event at set: {}\n\t server: {}\n\t client: {}-[{}]\n\t status: {}\n".format(event.identifier[0],serveridx,event.client,\
+                                                                                                               event.client.value["index"],set.servers[serveridx].state))
         
         print("          ------------Set info-------------")
         print("Set time:\n\tCurrent:\t{}\n\tArrival:\t{}\n\tCompletation:\t{}\n".format(set.timer.current,set.timer.arrival,set.timer.completation))
@@ -550,7 +552,7 @@ class Simulation:
             # TODO better print
             print("\t{}".format(statusStats[elem]))
         
-        # TODO need server stats??
+        
 
         print("\n--------------------End info--------------------\n")
         #time.sleep(1)
@@ -563,6 +565,13 @@ class Simulation:
         set:ServerSet = None
         for set in self.serverSets:
             populationStats = set.getStatistics()
+            statusStats = set.status.GetStats()
+
+            print("Set time:\n\tCurrent:\t{}\n\tArrival:\t{}\n\tCompletation:\t{}\n".format(set.timer.current,set.timer.arrival,set.timer.completation))
+
+            for elem in list(ClientType):
+            # TODO better print
+                print("\t{}".format(statusStats[elem]))
            
             print("\nSET [{}] STATISTICS REPORT".format(set.identifier))
             print("\n\tCompletation time          :{:10.2f}".format(populationStats["time"]))
