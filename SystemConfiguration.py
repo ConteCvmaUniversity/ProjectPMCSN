@@ -103,11 +103,11 @@ class ServerServiceTime5(Enum):
 class ServerNumber(Enum):
     SET1    = 2 
     SET2    = 2
-    SET3    = 3
-    SET4    = 3
+    SET3    = 4
+    SET4    = 4
     SET5    = 2
 
-SERVERNUMBER = 10
+SERVERNUMBER = 14
 
 
 #

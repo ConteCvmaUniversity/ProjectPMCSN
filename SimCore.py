@@ -298,9 +298,9 @@ class Simulation:
     def __init__(self,seed,simulationTime=None) -> None:
         # Initialize simulation state
                 
-        self.reset_initial_state(seed,simulationTime)
+        self.reset_initial_state(seed,simulationTime=simulationTime)
 
-    def reset_initial_state(self,seed,simulationTime):
+    def reset_initial_state(self,seed,simulationTime=None):
         self.seed = seed
         self.continueSim = True
         self.serverSets = []
@@ -314,7 +314,7 @@ class Simulation:
         self.serverSets.append( ServerSet(5, ServerNumber.SET5.value , simulationTime) )
         
     
-    def startSimulation(self,stationary=False,batch=None):
+    def startSimulation(self,stationary=False,batch=None,saveFile = None):
         localTime = time.strftime("%H:%M:%S", time.localtime())
         print(localTime)
         plantSeeds(self.seed)
@@ -517,6 +517,7 @@ class Simulation:
                 raise SimulationError("Set Selector not in range val:{}".format(setSelector))
 
             # if debug is on print update of simulation
+            
 
             if __debug__ :
                 self.__printDebugUpdate(self.next,selectedSet)
@@ -524,13 +525,15 @@ class Simulation:
             if stationary:
                 # if a batch its terminated compute statistics and reset
                 
-                if (sum(self.serverSets[0].status.completed) == (batch[0])):
+                #if (sum(self.serverSets[0].status.completed) == (batch[0])):
+                if (self.serverSets[0].timer.current > batch[0] * (batch_index + 1)):
+                    print("Batch number {} completed".format(batch_index))
                     # compute stats
                     set:ServerSet = None
                     for set in self.serverSets:
                         statusStats = set.getStatistics(batchTime = batch[0] * batch_index)
                         
-                        stringName = "Set{}_{}.csv".format(set.identifier,localTime)
+                        stringName = "Set{}.csv".format(set.identifier)
                         
                         path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
                         self.__saveStatsOnFile(statusStats,path) 
@@ -542,19 +545,30 @@ class Simulation:
                     
         #END WHILE
 
-        # TODO caso stazionario
-        if stationary:
-            # compute final stationary stats
-            set:ServerSet = None
-            for set in self.serverSets:
-                statusStats = set.getStatistics(batchTime = batch[0] * (batch_index - 1))
-                
-                stringName = "Set{}_{}.csv".format(set.identifier,localTime)
-                path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
-                self.__saveStatsOnFile(statusStats,path)
-
         if __debug__ :
             self.__printStatistics()
+
+        if stationary:
+            # compute final stationary stats
+            
+            set:ServerSet = None
+            for set in self.serverSets:
+
+                
+                stringName = "Set{}.csv".format(set.identifier)
+                path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
+                self.__saveStatsOnFile(statusStats,path)
+        
+        if saveFile != None:
+                set:ServerSet = None
+                for set in self.serverSets:
+                    statusStats = set.getStatistics()
+                    stringName = "Set{}.csv".format(set.identifier)
+                        
+                    path = os.path.join(ROOT_DIR,saveFile,stringName)
+                    self.__saveStatsOnFile(statusStats,path)
+
+        
          
     
     # This function search next event from events list of the sets and pop it

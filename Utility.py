@@ -6,6 +6,8 @@ from SystemConfiguration import ClientType,ServerStateType, \
 from TimeDef    import Event ,EventType
 from lib.rngs   import plantSeeds,random,selectStream
 from lib.rvgs   import Exponential
+from lib.rvms   import idfStudent
+from math       import sqrt
 
 # Si poteva creare una enum o una classe per questi dati ?!
 DISC_PROB_STREAM      = 0
