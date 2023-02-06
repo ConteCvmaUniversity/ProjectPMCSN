@@ -23,7 +23,9 @@ def main():
         print("\t[1] Output single simulation run \n")
         print("\t[2] Validation Run\n")
         print("\t[3] Infinite Horizon study\n")
-        print("\t[4] TEST Output for best probability study\n")
+        print("\t[4] TEST Configuration 1\n")
+        print("\t[5] TEST Configuration 2\n")
+        print("\t[6] TEST Configuration 3\n")
 
         try:
             inp = int(input("Select a number from menu: "))
@@ -40,13 +42,34 @@ def main():
                 singleRun(9)
             
         elif (inp == 2):
-            validation(256)
+            validation(256,"outputStat/Validation")
             
 
         elif (inp == 3) :
             
-            batch = (1024,128) #(b,k) TODO come selezionare
+            #batch = (1024,128) #(b,k) TODO come selezionare
+            batch = (256,64)
             InfiniteHorizonStudy(batch)
+
+        elif (inp == 4):
+            print("ATTENTION CONFIGURE SYSTEM MANUALLY, CONTROL IT")
+            time.sleep(1)
+
+            file = "outputStat/Test/conf1"
+            test(500,file)
+        elif (inp == 5):
+            print("ATTENTION CONFIGURE SYSTEM MANUALLY, CONTROL IT")
+            time.sleep(1)
+
+            file = "outputStat/Test/conf2"
+            test(500,file)
+
+        elif (inp == 6):
+            print("ATTENTION CONFIGURE SYSTEM MANUALLY, CONTROL IT")
+            time.sleep(1)
+            
+            file = "outputStat/Test/conf3"
+            test(500,file)
 
         elif (inp == 0):
             print("\n-------------------QUIT--------------------\n")
@@ -62,11 +85,11 @@ def singleRun(seed = 9):
     sim = Simulation(seed)
     sim.startSimulation()
 
-def validation(replica):
+def validation(replica,file):
     seed = 123456789
     sim = Simulation(seed)
     for i in range(0,replica):
-        sim.startSimulation(saveFile="outputStat/Validation")
+        sim.startSimulation(saveFile=file)
         seed = lib.rngs.getSeed()
         print("Run number {} completed, new seed: {}".format(i,seed))
         sim.reset_initial_state(seed)
@@ -77,8 +100,14 @@ def InfiniteHorizonStudy(batch,seed = 12345):
     sim.startSimulation(stationary=True,batch=batch)
 
 
-def FiniteHorizonStudy():
-    replication = None
+def test(replica,file):
+    lib.rngs.plantSeeds(9)
+    sim = Simulation(None)
+    for i in range(0,replica):
+        sim.startSimulation(saveFile=file)
+        print("Run number {} completed".format(i))
+        sim.reset_initial_state(None)
+
 
 
 

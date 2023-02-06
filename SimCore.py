@@ -169,9 +169,10 @@ class ServerSet:
             if (priority):
                 client = self.status.GetFirstClientQueueNotEmptyPriority()
             else:
-                client = self.status.GetFirstClientQueueNotEmpty()
+                client = self.status.GetFirstClientQueueNotEmpty(self.timer.arrival)
 
             serverNewState = self.metadata.clientToSStateMap[client]
+
             if serverNewState == -1:
                 raise SimulationError("Server {} receive a client not admitted {}".format((self.identifier,serverId),client))
             
@@ -235,15 +236,21 @@ class ServerSetStatus:
 
     # No priority defined for select the empty queue
     # service more capient queue
-    def GetFirstClientQueueNotEmpty(self) -> ClientType:
-        last = 0
+    def GetFirstClientQueueNotEmpty(self,arr) -> ClientType:
+        
+        lastIdx = 0
         retType = None
+
         for typ in list(ClientType):
-            actual = self.__clientInQueue(typ)
-            if ( (actual > 0) and (actual > last) ) :
-                last = actual
+            idx = typ.value["index"]
+            lastIdx = idx
+            #actual = self.__clientInQueue(typ) #TODO verione size based
+            if ( (self.__clientInQueue(typ)>0) and (arr[idx] >= arr[lastIdx] ) ):
+            # if ( (actual > 0) and (actual > last) ) : #TODO versione size based
+                lastIdx = idx
                 retType = typ
-        if (last == 0):
+            
+        if (retType ==None ):
             # All queue are empty    
             raise AllQueueEmpty()
         else:
@@ -265,7 +272,6 @@ class ServerSetStatus:
         # All queue are empty    
         raise AllQueueEmpty()   
         
-
 
     def __clientInQueue(self,cl:ClientType):
         idx = cl.value["index"]
@@ -317,7 +323,8 @@ class Simulation:
     def startSimulation(self,stationary=False,batch=None,saveFile = None):
         localTime = time.strftime("%H:%M:%S", time.localtime())
         print(localTime)
-        plantSeeds(self.seed)
+        if (self.seed != None):
+            plantSeeds(self.seed)
 
         
         self.serverSets[0].GetArrivalForAllEvent()
@@ -535,7 +542,7 @@ class Simulation:
                         
                         stringName = "Set{}.csv".format(set.identifier)
                         
-                        path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
+                        path = os.path.join(ROOT_DIR,STATIONARY_DIR,stringName)
                         self.__saveStatsOnFile(statusStats,path) 
 
 
@@ -553,10 +560,9 @@ class Simulation:
             
             set:ServerSet = None
             for set in self.serverSets:
-
                 
                 stringName = "Set{}.csv".format(set.identifier)
-                path = os.path.join(ROOT_DIR,"outputStat/Stationary",stringName)
+                path = os.path.join(ROOT_DIR,STATIONARY_DIR,stringName)
                 self.__saveStatsOnFile(statusStats,path)
         
         if saveFile != None:

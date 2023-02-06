@@ -3,6 +3,7 @@ from TimeDef import STOP
 import os
 
 ROOT_DIR = os.path.dirname(__file__)
+STATIONARY_DIR = "outputStat/Stationary"
 
 # GLOBAL VALUE
 simulationTimeG         = STOP
@@ -103,11 +104,11 @@ class ServerServiceTime5(Enum):
 class ServerNumber(Enum):
     SET1    = 2 
     SET2    = 2
-    SET3    = 4
-    SET4    = 4
+    SET3    = 5
+    SET4    = 5
     SET5    = 2
 
-SERVERNUMBER = 14
+SERVERNUMBER = 16
 
 
 #
