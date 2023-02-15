@@ -21,7 +21,7 @@ def main():
         print("\n--------------------MENU--------------------\n")
         print("\t[0] Quit program \n")
         print("\t[1] Output single simulation run \n")
-        print("\t[2] Validation Run\n")
+        print("\t[2] Verify Run\n")
         print("\t[3] Infinite Horizon study\n")
         print("\t[4] TEST Configuration 1\n")
         print("\t[5] TEST Configuration 2\n")
@@ -42,7 +42,7 @@ def main():
                 singleRun(9)
             
         elif (inp == 2):
-            validation(256,"outputStat/Validation")
+            validation(100,"outputStat/Verify")
             
 
         elif (inp == 3) :

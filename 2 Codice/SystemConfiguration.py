@@ -112,25 +112,25 @@ class ServerServiceTime5(Enum):
 
 # Exponential service configuration
 class ServerServiceTime1Exp(Enum):
-    BUSY    = 0.5
-    FAMILY  = 1
+    BUSY    = 0.75
+    FAMILY  = 0.75
 
 class ServerServiceTime2Exp(Enum):
-    BUSY    = 0.5
-    FAMILY  = 1
+    BUSY    = 0.75
+    FAMILY  = 0.75
 
 class ServerServiceTime3Exp(Enum):
-    MAGG    = 4
-    FAMILY  = 6
+    MAGG    = 5
+    FAMILY  = 5
 
 class ServerServiceTime4Exp(Enum):
     COMPLETE    = 3
-    MAGG        = 7
-    FAMILY      = 9
+    MAGG        = 3
+    FAMILY      = 3
 
 class ServerServiceTime5Exp(Enum):
-    SINGOLO     = 1.5
-    GRUPPO      = 0.5
+    SINGOLO     = 1
+    GRUPPO      = 1
 
 #-------------------------------------------------------------------------
 # SERVER NUMBER CONFIGURATION
@@ -139,8 +139,8 @@ class ServerServiceTime5Exp(Enum):
 class ServerNumber(Enum):
     SET1    = 2 
     SET2    = 2
-    SET3    = 5
-    SET4    = 5
+    SET3    = 4
+    SET4    = 4
     SET5    = 2
 
 SERVERNUMBER = 16

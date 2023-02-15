@@ -15,6 +15,16 @@ class Timer:
     
     def UpdateCurrent(self,val):
         self.current = val
+    
+    def LastArrival(self):
+        cp = self.arrival
+        while INFINITY in cp : cp.remove(INFINITY)
+        return max(cp)
+
+    def LastCompletation(self):
+        cp = self.arrival
+        while INFINITY in cp : cp.remove(INFINITY)
+        return max(cp)
 
 
 class EventType(Enum):

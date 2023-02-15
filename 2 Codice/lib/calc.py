@@ -43,8 +43,8 @@ class ClientType(Enum):
     #print("{} prob: {}".format(elem.name,elem.value["prob"]))
 
 #print("\n ...... com ....\n\n")
-RHO = 0.81113487
-M = 4
+RHO = 0.344732375
+M = 2
 #LAM = 0.68946475
 ES = 1
 

@@ -37,6 +37,7 @@ class ServerSet:
         
         stat ["time"]           = current
         stat ["completations"]  = completations
+
         for elem in list(ClientType):
             idx = elem.value["index"]
             div = self.status.completed[idx]
@@ -54,7 +55,12 @@ class ServerSet:
 
         stat ["l"]  = self.area.clients / current
         stat ["q"]  = self.area.queue   / current
-        stat ["x"]  = self.area.service / current
+        stat ["x"]  = self.area.service / (current * self.channels)
+
+        stat ["a"]  = self.timer.LastArrival()
+        stat ["c"]  = self.timer.LastCompletation()
+
+        stat ["u"]  = self.servers[0].service / current
 
         return stat
 
@@ -145,11 +151,13 @@ class ServerSet:
         
 
     def AddService(self,client,id,serverState):
-        
-        ev = GetService(self.timer.current,client,id,serverState)
+        #TODO importante ritornare a get service 
+        #ev = GetService(self.timer.current,client,id,serverState)
+        ev = GetServiceExp(self.timer.current,client,id,serverState)
         self.AddEvent(ev)
         self.UpdateTimer(ev)
         self.status.AddServedClient(client)
+        self.servers[ev.identifier[1]].addService(ev.time - self.timer.current)
     
     def GetIdleServerId(self):
         if (self.status.number <= self.channels):
@@ -285,10 +293,16 @@ class Server:
         self.identifier = id                # Server identifier
         self.state = ServerStateType.IDLE   # server state
         self.client = None                  # actual served client
+        self.service = 0.0                  # total service time 
+        self.served = 0                     # total served client
     
     def UpdateState(self,state,client):
         self.state = state
         self.client = client
+    
+    def addService(self,time):
+        self.service += time
+        self.served  += 1
     
     def GetServerIdentifier(self):
         return (self.setID,self.identifier)
@@ -357,9 +371,14 @@ class Simulation:
             setSelector = self.next.identifier if nextIsArrival else self.next.identifier[0] # identifier of set from 1 to 5
             client = self.next.client
 
-            selectedSet :ServerSet = self.serverSets[setSelector - 1]   # set of the event ATTETION setSelector start from 1
+            selectedSet :ServerSet = self.serverSets[setSelector - 1]   # set of the event ATTENTION setSelector start from 1
+
+            # TRY UPDATE ALL SET TODO si può aggiornare l'area del solo set
             selectedSet.UpdateSetArea(self.next.time)                   # update set area
             selectedSet.UpdateCurrentTime(self.next.time)               # update current value in set timer
+            #for tempSet in self.serverSets:
+            #    tempSet.UpdateSetArea(self.next.time)    
+            #    tempSet.UpdateCurrentTime(self.next.time)
 
             #if (not self.continueSim):
             #    print("Simulation reach stop but processing queue job:\n SET[{}], \nevenTypeArrival[{}], time: {}\n client:{}\n---------\n".format(selectedSet.identifier,nextIsArrival,self.next.time,client))
@@ -379,7 +398,8 @@ class Simulation:
                     except SimulationStop as stop:
                         # SetUp stop simulation
                         # TODO controllare se basta aggiornare solo questa variabile
-                        print("Simulation Stop raised from GetArrivalByClient: {}".format(stop))
+                        # TODO print successivo utile
+                        #print("Simulation Stop raised from GetArrivalByClient: {}".format(stop))
                         self.continueSim = False
                     
                     # Schedule the arrival and generate completation event
@@ -607,13 +627,13 @@ class Simulation:
             set.resetSetForBatch()
 
     def __saveStatsOnFile(self,stats:dict,filePath):
-        fdname= ["time","completations","s","d","w","l","q","x"]
+        fdname= ["time","completations","s","d","w","l","q","x","a","c","u"]
         
         with open(filePath,'a+') as f:
             writer = csv.DictWriter(f,fieldnames=fdname,delimiter=',',lineterminator='\n')
             if f.tell()== 0:
                 writer.writeheader()
-            stats.pop("r")
+            stats.pop("r") # remove dict r
             writer.writerow(stats)
         
 
