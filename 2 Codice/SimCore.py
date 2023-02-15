@@ -28,7 +28,7 @@ class ServerSet:
         self.area.resetArea()
         
     
-    def getStatistics(self,batchTime=0.0) -> dict:
+    def getStatistics(self,batchTime=0.0,tmp=False) -> dict:
         stat = {}
         temp = {}
         completations = sum(self.status.completed)
@@ -48,10 +48,17 @@ class ServerSet:
         
         # From book notation
         stat ["r"]  = temp
+        if tmp :
+            print(stat["r"])
         
-        stat ["s"]  = self.area.service / completations
-        stat ["d"]  = self.area.queue   / completations
-        stat ["w"]  = self.area.clients / completations   
+        if (completations != 0):
+            stat ["s"]  = self.area.service / completations
+            stat ["d"]  = self.area.queue   / completations
+            stat ["w"]  = self.area.clients / completations
+        else:
+            stat ["s"]  = 0
+            stat ["d"]  = 0
+            stat ["w"]  = 0
 
         stat ["l"]  = self.area.clients / current
         stat ["q"]  = self.area.queue   / current
@@ -109,6 +116,7 @@ class ServerSet:
         idx = event.client.value["index"]
         if (event.typ == EventType.ARRIVAL):
             self.timer.arrival[idx] = event.time
+
         elif (event.typ == EventType.COMPLETATION):
             self.timer.completation[idx] = event.time
     
@@ -561,8 +569,11 @@ class Simulation:
                         statusStats = set.getStatistics(batchTime = batch[0] * batch_index)
                         
                         stringName = "Set{}.csv".format(set.identifier)
-                        
-                        path = os.path.join(ROOT_DIR,STATIONARY_DIR,stringName)
+                        if saveFile != None:
+                            path = os.path.join(ROOT_DIR,saveFile,stringName)
+                        else:
+                            path = os.path.join(ROOT_DIR,STATIONARY_DIR,stringName)
+
                         self.__saveStatsOnFile(statusStats,path) 
 
 
@@ -580,10 +591,15 @@ class Simulation:
             
             set:ServerSet = None
             for set in self.serverSets:
-                
+                statusStats = set.getStatistics()
                 stringName = "Set{}.csv".format(set.identifier)
-                path = os.path.join(ROOT_DIR,STATIONARY_DIR,stringName)
+                if saveFile != None:
+                    path = os.path.join(ROOT_DIR,saveFile,stringName)
+                else:
+                    path = os.path.join(ROOT_DIR,STATIONARY_DIR,stringName)
+
                 self.__saveStatsOnFile(statusStats,path)
+                
         
         if saveFile != None:
             set:ServerSet = None
@@ -633,7 +649,9 @@ class Simulation:
             writer = csv.DictWriter(f,fieldnames=fdname,delimiter=',',lineterminator='\n')
             if f.tell()== 0:
                 writer.writeheader()
+            
             stats.pop("r") # remove dict r
+            
             writer.writerow(stats)
         
 

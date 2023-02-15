@@ -17,12 +17,12 @@ class Timer:
         self.current = val
     
     def LastArrival(self):
-        cp = self.arrival
+        cp = self.arrival.copy()
         while INFINITY in cp : cp.remove(INFINITY)
         return max(cp)
 
     def LastCompletation(self):
-        cp = self.arrival
+        cp = self.arrival.copy()
         while INFINITY in cp : cp.remove(INFINITY)
         return max(cp)
 

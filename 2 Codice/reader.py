@@ -8,8 +8,8 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "Verify"
-columName = "x"
+stringName = "FindBatch/64"
+columName = "time"
 
 path = os.path.join(ROOT_DIR,TEST_DIR,stringName)
 

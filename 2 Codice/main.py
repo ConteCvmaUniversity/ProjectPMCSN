@@ -2,6 +2,7 @@ import time
 import SystemConfiguration
 from SimCore import Simulation
 import lib.rngs
+import os
 
 
 
@@ -26,6 +27,7 @@ def main():
         print("\t[4] TEST Configuration 1\n")
         print("\t[5] TEST Configuration 2\n")
         print("\t[6] TEST Configuration 3\n")
+        print("\t[7] Find batch based on correlation\n")
 
         try:
             inp = int(input("Select a number from menu: "))
@@ -70,6 +72,9 @@ def main():
             
             file = "outputStat/Test/conf3"
             test(500,file)
+        
+        elif (inp==7):
+            FindBatch(64)
 
         elif (inp == 0):
             print("\n-------------------QUIT--------------------\n")
@@ -98,6 +103,26 @@ def InfiniteHorizonStudy(batch,seed = 12345):
     simulationTime = ( batch[0] * batch[1] ) #/ SystemConfiguration.arrivalRate
     sim = Simulation(seed,simulationTime=simulationTime)
     sim.startSimulation(stationary=True,batch=batch)
+
+def FindBatch(k):
+    seed = 25637
+    sim = Simulation(seed)
+    b = 64 
+    while(b<2049):
+        path = "outputStat/FindBatch/{}".format(b)
+        try:
+            os.mkdir(os.path.join(os.path.dirname(__file__),path))
+        except FileExistsError:
+            print("existing dir")
+        sim.reset_initial_state(seed,simulationTime=b*k)
+
+        batch = (b,k)
+        sim.startSimulation(stationary=True,batch=batch,saveFile=path)
+
+        seed = lib.rngs.getSeed()
+        print("Run batch {} completed, new seed: {}".format(b,seed))
+        b = b*2
+ 
 
 
 def test(replica,file):
