@@ -566,13 +566,13 @@ class Simulation:
                 self.__saveStatsOnFile(statusStats,path)
         
         if saveFile != None:
-                set:ServerSet = None
-                for set in self.serverSets:
-                    statusStats = set.getStatistics()
-                    stringName = "Set{}.csv".format(set.identifier)
-                        
-                    path = os.path.join(ROOT_DIR,saveFile,stringName)
-                    self.__saveStatsOnFile(statusStats,path)
+            set:ServerSet = None
+            for set in self.serverSets:
+                statusStats = set.getStatistics()
+                stringName = "Set{}.csv".format(set.identifier)
+                    
+                path = os.path.join(ROOT_DIR,saveFile,stringName)
+                self.__saveStatsOnFile(statusStats,path)
 
         
          

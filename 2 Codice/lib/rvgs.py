@@ -37,6 +37,7 @@
  #--------------------------------------------------------------------------
 from lib.rngs import random
 from math import log,sqrt,exp
+from lib.rvms import cdfNormal,idfNormal
 
 def Bernoulli(p):
   #========================================================
@@ -201,6 +202,19 @@ def Student(n):
   #===========================================
   #
   return (Normal(0.0, 1.0) / sqrt(Chisquare(n) / n))
+
+def TruncatedNormal(m,sd,a,b):
+  #========================================================================
+  #Returns a normal (Gaussian) distributed real number.
+  #NOTE: use s > 0.0
+  #
+  #Uses a very accurate approximation of the normal idf due to Odeh & Evans, 
+  #J. Applied Statistics, 1974, vol 23, pp 96-97.
+  #========================================================================
+  alpha = cdfNormal(m,sd,a)
+  beta  = 1.0 -cdfNormal(m,sd,b)
+  u     = Uniform(alpha,1.0-beta)
+  return idfNormal(m,sd,u)
 
 def testFunctions():
   #tests to ensure that all variates match what was produced by C version of program (with the same order and parameters)

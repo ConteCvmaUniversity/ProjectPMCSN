@@ -11,6 +11,10 @@ probabilityDiscardSet1  = 0.01
 arrivalRate             = (450/STOP)   
 
 
+#-------------------------------------------------------------------------
+# CLIENT CONFIGURATION
+#-------------------------------------------------------------------------
+
 class ClientTProb(Enum):
     SOCIO       = 0.05
     RINNOVO     = 0.1
@@ -54,6 +58,11 @@ class ClientType(Enum):
 
 CLIENTTYPENUM = len(ClientType)
 
+
+#-------------------------------------------------------------------------
+# SERVER STATE CONFIGURATION
+#-------------------------------------------------------------------------
+
 class ServerStateType():
     IDLE    = -1
 
@@ -80,26 +89,52 @@ class ServerStateType5(ServerStateType):
     GRUPPO      = 2
 
 # Classes that define service time (clone of state)
-class ServerServiceTime1(Enum):
+class ServerServiceTime1(Enum): # Erlang (n,b)
+    BUSY    = (2,0.25)
+    FAMILY  = (2,0.5)
+
+class ServerServiceTime2(Enum): # Uniform (a,b)
+    BUSY    = (1/3,2/3)
+    FAMILY  = (2/3,4/3)
+
+class ServerServiceTime3(Enum): # Truncated Normal (m,sd,a,b)
+    MAGG    = (4,2,2,10)
+    FAMILY  = (6,2,2,10)
+
+class ServerServiceTime4(Enum): # Truncated Normal (m,sd,a,b)
+    COMPLETE    = (3,1,1,5)
+    MAGG        = (3,1,1,5)
+    FAMILY      = (3,1,1,5)
+
+class ServerServiceTime5(Enum):
+    SINGOLO     = (1.5,0.2,1,2) # Truncated Normal (m,sd,a,b)
+    GRUPPO      = (1/3,2/3)     # Uniform (a,b)
+
+# Exponential service configuration
+class ServerServiceTime1Exp(Enum):
     BUSY    = 0.5
     FAMILY  = 1
 
-class ServerServiceTime2(Enum):
+class ServerServiceTime2Exp(Enum):
     BUSY    = 0.5
     FAMILY  = 1
 
-class ServerServiceTime3(Enum):
+class ServerServiceTime3Exp(Enum):
     MAGG    = 4
     FAMILY  = 6
 
-class ServerServiceTime4(Enum):
+class ServerServiceTime4Exp(Enum):
     COMPLETE    = 3
     MAGG        = 7
     FAMILY      = 9
 
-class ServerServiceTime5(Enum):
+class ServerServiceTime5Exp(Enum):
     SINGOLO     = 1.5
     GRUPPO      = 0.5
+
+#-------------------------------------------------------------------------
+# SERVER NUMBER CONFIGURATION
+#-------------------------------------------------------------------------
 
 class ServerNumber(Enum):
     SET1    = 2 
@@ -111,9 +146,9 @@ class ServerNumber(Enum):
 SERVERNUMBER = 16
 
 
-#
+#-------------------------------------------------------------------------
 # Metadata for server set
-#
+#-------------------------------------------------------------------------
 
 class SetMetadata:
     numberOfQueue = None                        #Define number of queue in set, consequently number of arrivals type
