@@ -8,7 +8,7 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "LambdaVar/525/x_stat_compact.csv"
+stringName = "LambdaVar/480/x_stat_compact.csv"
 #columName = ["Total"]
 columName = ["Set1.csv","Set2.csv","Set3.csv","Set4.csv","Set5.csv"]
 path = os.path.join(ROOT_DIR,TEST_DIR,stringName)

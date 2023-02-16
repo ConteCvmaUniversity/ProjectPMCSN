@@ -8,7 +8,7 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "LambdaVar/525"
+stringName = "LambdaVar/400"
 columName = "x"
 
 
