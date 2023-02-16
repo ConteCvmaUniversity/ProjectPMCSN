@@ -66,7 +66,7 @@ CLIENTTYPENUM = len(ClientType)
 # SERVER STATE CONFIGURATION
 #-------------------------------------------------------------------------
 
-EXPONENTIAL = False
+EXPONENTIAL = False  # if true all service are exponential
 
 class ServerStateType():
     IDLE    = -1
@@ -148,7 +148,7 @@ class ServerNumber(Enum):
     SET4    = 4
     SET5    = 2
 
-SERVERNUMBER = 16
+#SERVERNUMBER = 16
 
 
 #-------------------------------------------------------------------------
