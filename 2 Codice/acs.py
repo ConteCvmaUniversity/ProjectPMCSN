@@ -39,13 +39,14 @@ from math import sqrt
 # for select the path of simulation file
 TEST_DIR = "outputStat"
 stringName = "FindBatch/2048"
-columName = "w"
+file = "w_stat_compact.csv"
+columName = "Total"
 
 path = os.path.join(ROOT_DIR,TEST_DIR,stringName)
 
 def acs_f(data):
 
-    K = 8                             # K is the maximum lag */
+    K = 10                             # K is the maximum lag */
     SIZE = (K + 1)
 
 
@@ -58,18 +59,29 @@ def acs_f(data):
 
 
     while (i < SIZE):              # initialize the hold array with */
-        x = data[i]     # the first K + 1 data values    */
+        try:
+            x =  data.pop(0) #lines read in as string
+        except:
+            print(data)
+            raise     # the first K + 1 data values    */
+
         sum += x
         hold.append(x)
         i += 1
     #EndWhile
 
-    x = data[SIZE:len(data)]   
 
-    while (len(x)<0):
+
+    while (len(data)<0):
         for j in range(0,SIZE):
             cosum[j] += hold[p] * hold[(p + j) % SIZE]
-        tmp =  x.pop(0) #lines read in as string
+        try:
+            tmp =  data.pop(0) #lines read in as string
+        except:
+            print(data)
+            raise
+        
+        
         sum    += tmp
         hold[p] = tmp
         p       = (p + 1) % SIZE
@@ -102,16 +114,18 @@ def acs_f(data):
 # main
 print("READING COLUMN: {}\n".format(columName))
 print("DIRECTORY : {}".format(path))
+print("FILE: {}\n".format(file))
 
-for file in [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]:
 
-    filePath = os.path.join(path, file)
-    df=pd.read_csv(filePath)
+filePath = os.path.join(path, file)
+df=pd.read_csv(filePath)
 
-    specific_column=df[columName] #extract column
+specific_column=df[columName] #extract column
 
-    
-    print("file : {}".format(file))
-    
-    acs_f(specific_column)
-    print("")
+a = []
+for elem in specific_column:
+    a.append(elem)
+
+
+acs_f(a)
+print("")

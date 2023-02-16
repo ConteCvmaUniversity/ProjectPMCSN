@@ -44,9 +44,9 @@ class ClientType(Enum):
 
 #print("\n ...... com ....\n\n")
 RHO = 0.344732375
-M = 2
-#LAM = 0.68946475
-ES = 1
+M = 4
+LAM = 1.00767925
+ES = 3
 
 
 def factorial(n):
@@ -64,9 +64,11 @@ def special_sum():
     return sum
 
 
-p_0 = 1/(special_sum() + ((M*RHO)**M)/(factorial(M) * (1-RHO) ) )
+p_0 = 1/(special_sum() + (((M*RHO)**M)/(factorial(M) * (1-RHO) )) )
+print("p_0 = {}".format(p_0))
 
-Pq = ((M*RHO)**M)/(factorial(M) * (1-RHO) ) * p_0
+Pq = (((M*RHO)**M)/(factorial(M) * (1-RHO) )) * p_0
+print("Pq = {}".format(Pq))
 
 Tq = Pq * ((ES)/((1-RHO)))
 
