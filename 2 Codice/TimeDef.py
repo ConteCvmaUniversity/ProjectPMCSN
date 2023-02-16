@@ -19,12 +19,18 @@ class Timer:
     def LastArrival(self):
         cp = self.arrival.copy()
         while INFINITY in cp : cp.remove(INFINITY)
-        return max(cp)
+        try:
+            return max(cp)
+        except:
+            return INFINITY
 
     def LastCompletation(self):
         cp = self.arrival.copy()
         while INFINITY in cp : cp.remove(INFINITY)
-        return max(cp)
+        try:
+            return max(cp)
+        except:
+            return INFINITY
 
 
 class EventType(Enum):

@@ -60,14 +60,23 @@ class ServerSet:
             stat ["d"]  = 0
             stat ["w"]  = 0
 
-        stat ["l"]  = self.area.clients / current
-        stat ["q"]  = self.area.queue   / current
-        stat ["x"]  = self.area.service / (current * self.channels)
+        if (current != 0):
+            stat ["l"]  = self.area.clients / current
+            stat ["q"]  = self.area.queue   / current
+            stat ["x"]  = self.area.service / (current * self.channels)
+        else:
+            stat ["l"]  = 0
+            stat ["q"]  = 0
+            stat ["x"]  = 0
+
 
         stat ["a"]  = self.timer.LastArrival()
         stat ["c"]  = self.timer.LastCompletation()
 
-        stat ["u"]  = self.servers[0].service / current
+        if current != 0:
+            stat ["u"]  = self.servers[0].service / current
+        else:
+            stat ["u"]  = 0
 
         return stat
 
@@ -159,9 +168,14 @@ class ServerSet:
         
 
     def AddService(self,client,id,serverState):
-        #TODO importante ritornare a get service 
-        #ev = GetService(self.timer.current,client,id,serverState)
-        ev = GetServiceExp(self.timer.current,client,id,serverState)
+        # Depending on system configuration service interface  
+        #
+        if EXPONENTIAL:
+            ev = GetServiceExp(self.timer.current,client,id,serverState)
+        else:
+            ev = GetService(self.timer.current,client,id,serverState)
+
+        # add event
         self.AddEvent(ev)
         self.UpdateTimer(ev)
         self.status.AddServedClient(client)
@@ -342,17 +356,24 @@ class Simulation:
         self.serverSets.append( ServerSet(5, ServerNumber.SET5.value , simulationTime) )
         
     
-    def startSimulation(self,stationary=False,batch=None,saveFile = None):
+    def startSimulation(self,batch=None,saveFile = None,slotted=False):
         localTime = time.strftime("%H:%M:%S", time.localtime())
         print(localTime)
         if (self.seed != None):
             plantSeeds(self.seed)
 
-        
-        self.serverSets[0].GetArrivalForAllEvent()
+        #------------------
+        # Variable for time stats get 
+        globalClock = 0
+        currentTimeSlot = 0
 
-        if stationary:
-            batch_index = 0   
+        #------------------
+
+        self.serverSets[0].GetArrivalForAllEvent()
+        stationary = False
+        if type(batch) != type(None):
+            batch_index = 0
+            stationary = True   
         
 
         while(  (self.continueSim) or                        \
@@ -381,9 +402,15 @@ class Simulation:
 
             selectedSet :ServerSet = self.serverSets[setSelector - 1]   # set of the event ATTENTION setSelector start from 1
 
-            # TRY UPDATE ALL SET TODO si può aggiornare l'area del solo set
+            
             selectedSet.UpdateSetArea(self.next.time)                   # update set area
             selectedSet.UpdateCurrentTime(self.next.time)               # update current value in set timer
+
+            ## ONLY for local stat
+            if slotted:
+                globalClock = self.next.time
+
+            # TODO rimuovere commenti sotto   
             #for tempSet in self.serverSets:
             #    tempSet.UpdateSetArea(self.next.time)    
             #    tempSet.UpdateCurrentTime(self.next.time)
@@ -552,8 +579,6 @@ class Simulation:
                 raise SimulationError("Set Selector not in range val:{}".format(setSelector))
 
             # if debug is on print update of simulation
-            
-
             if __debug__ :
                 self.__printDebugUpdate(self.next,selectedSet)
 
@@ -580,6 +605,22 @@ class Simulation:
                     # reset
                     batch_index += 1
                     self.__resetForBatch()
+            
+            if (slotted and (globalClock>( (currentTimeSlot+1) * timeSlotSize) ) and (currentTimeSlot!=timeSlotNum) ):
+                currentTimeSlot += 1
+                print(f"\t-> Slot Number {currentTimeSlot}")
+                set:ServerSet = None
+                for set in self.serverSets:
+                    statusStats = set.getStatistics()
+                    
+                    stringName = "Set{}.csv".format(set.identifier)
+
+                    path = os.path.join(ROOT_DIR,saveFile,stringName)
+
+                    statusStats["Slot"] = currentTimeSlot
+                    self.__saveStatsOnFile(statusStats,path,slotted=True)
+
+
                     
         #END WHILE
 
@@ -601,7 +642,7 @@ class Simulation:
                 self.__saveStatsOnFile(statusStats,path)
                 
         
-        if saveFile != None:
+        if ( (saveFile != None) and (not slotted) ):
             set:ServerSet = None
             for set in self.serverSets:
                 statusStats = set.getStatistics()
@@ -609,6 +650,20 @@ class Simulation:
                     
                 path = os.path.join(ROOT_DIR,saveFile,stringName)
                 self.__saveStatsOnFile(statusStats,path)
+        
+        if ( (saveFile != None) and (slotted) ):
+            currentTimeSlot += 1
+            print(f"\t-> Slot Number {currentTimeSlot}")
+            set:ServerSet = None
+            for set in self.serverSets:
+                statusStats = set.getStatistics()
+                
+                stringName = "Set{}.csv".format(set.identifier)
+
+                path = os.path.join(ROOT_DIR,saveFile,stringName)
+
+                statusStats["Slot"] = currentTimeSlot
+                self.__saveStatsOnFile(statusStats,path,slotted=True)
 
         
          
@@ -642,8 +697,13 @@ class Simulation:
         for set in self.serverSets:
             set.resetSetForBatch()
 
-    def __saveStatsOnFile(self,stats:dict,filePath):
-        fdname= ["time","completations","s","d","w","l","q","x","a","c","u"]
+    def __saveStatsOnFile(self,stats:dict,filePath,slotted=False):
+        if slotted:
+            fdname= ["Slot","time","completations","s","d","w","l","q","x","a","c","u"]
+        else:
+            fdname= ["time","completations","s","d","w","l","q","x","a","c","u"]
+
+
         
         with open(filePath,'a+') as f:
             writer = csv.DictWriter(f,fieldnames=fdname,delimiter=',',lineterminator='\n')

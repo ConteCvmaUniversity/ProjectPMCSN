@@ -9,7 +9,10 @@ STATIONARY_DIR = "outputStat/Stationary"
 simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
 #arrivalRate             = (450/STOP)   
-arrivalRate             = (525/STOP)   
+arrivalRate             = (525/STOP)
+timeSlotSize            = 5
+timeSlotNum             = int(STOP/timeSlotSize)
+
 
 #-------------------------------------------------------------------------
 # CLIENT CONFIGURATION
@@ -62,6 +65,8 @@ CLIENTTYPENUM = len(ClientType)
 #-------------------------------------------------------------------------
 # SERVER STATE CONFIGURATION
 #-------------------------------------------------------------------------
+
+EXPONENTIAL = False
 
 class ServerStateType():
     IDLE    = -1

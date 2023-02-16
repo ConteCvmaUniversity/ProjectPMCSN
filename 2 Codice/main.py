@@ -29,6 +29,7 @@ def main():
         print("\t[6] TEST Configuration 3\n")
         print("\t[7] Find batch based on correlation\n")
         print("\t[8] Lambda variation\n")
+        print("\t[9] Slotted Test\n")
 
         try:
             inp = int(input("Select a number from menu: "))
@@ -82,6 +83,15 @@ def main():
             batch = (512,64)
             lambda_variation(batch,file)
 
+        elif (inp == 9):
+            print("ATTENTION CONFIGURE SYSTEM MANUALLY, CONTROL IT")
+            time.sleep(1)
+
+            repli   = 100
+            seed    = 56486921
+            file    = "outputStat/Slotted/conf1"
+            slotted_test(repli,file,seed)
+
         elif (inp == 0):
             print("\n-------------------QUIT--------------------\n")
         else:
@@ -108,7 +118,7 @@ def validation(replica,file):
 def InfiniteHorizonStudy(batch,seed = 12345):
     simulationTime = ( batch[0] * batch[1] ) #/ SystemConfiguration.arrivalRate
     sim = Simulation(seed,simulationTime=simulationTime)
-    sim.startSimulation(stationary=True,batch=batch)
+    sim.startSimulation(batch=batch)
 
 def FindBatch(k):
     seed = 25637
@@ -123,7 +133,7 @@ def FindBatch(k):
         sim.reset_initial_state(seed,simulationTime=b*k)
 
         batch = (b,k)
-        sim.startSimulation(stationary=True,batch=batch,saveFile=path)
+        sim.startSimulation(batch=batch,saveFile=path)
 
         seed = lib.rngs.getSeed()
         print("Run batch {} completed, new seed: {}".format(b,seed))
@@ -137,9 +147,16 @@ def lambda_variation(batch,file,seed = 72392):
         os.mkdir(os.path.join(os.path.dirname(__file__),file))
     except FileExistsError:
         print("existing dir")
-    sim.startSimulation(stationary=True,batch=batch,saveFile=file)
+    sim.startSimulation(batch=batch,saveFile=file)
     
-
+def slotted_test(replica,file,seed):
+    lib.rngs.plantSeeds(seed)
+    sim = Simulation(None)
+    for i in range(0,replica):
+        sim.startSimulation(saveFile=file,slotted=True)
+        print("Run number {} completed".format(i))
+        sim.reset_initial_state(None)
+        time.sleep(0.4)
 
 def test(replica,file):
     lib.rngs.plantSeeds(9)
