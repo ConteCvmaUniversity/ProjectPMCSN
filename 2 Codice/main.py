@@ -28,6 +28,7 @@ def main():
         print("\t[5] TEST Configuration 2\n")
         print("\t[6] TEST Configuration 3\n")
         print("\t[7] Find batch based on correlation\n")
+        print("\t[8] Lambda variation\n")
 
         try:
             inp = int(input("Select a number from menu: "))
@@ -75,6 +76,11 @@ def main():
         
         elif (inp==7):
             FindBatch(64)
+        
+        elif (inp == 8):
+            file = "outputStat/LambdaVar/520"
+            batch = (512,64)
+            lambda_variation(batch,file)
 
         elif (inp == 0):
             print("\n-------------------QUIT--------------------\n")
@@ -122,7 +128,17 @@ def FindBatch(k):
         seed = lib.rngs.getSeed()
         print("Run batch {} completed, new seed: {}".format(b,seed))
         b = b*2
- 
+
+def lambda_variation(batch,file,seed = 72392):
+    simulationTime = ( batch[0] * batch[1] ) #/ SystemConfiguration.arrivalRate
+    sim = Simulation(seed,simulationTime=simulationTime)
+
+    try:
+        os.mkdir(os.path.join(os.path.dirname(__file__),file))
+    except FileExistsError:
+        print("existing dir")
+    sim.startSimulation(stationary=True,batch=batch,saveFile=file)
+    
 
 
 def test(replica,file):

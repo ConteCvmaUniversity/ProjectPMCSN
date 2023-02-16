@@ -8,9 +8,9 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "Verify/comp"
-columName = ["Total"]
-
+stringName = "LambdaVar/525/x_stat_compact.csv"
+#columName = ["Total"]
+columName = ["Set1.csv","Set2.csv","Set3.csv","Set4.csv","Set5.csv"]
 path = os.path.join(ROOT_DIR,TEST_DIR,stringName)
 
 def estimate(data):
@@ -44,22 +44,47 @@ def estimate(data):
 
 
 # main
-print("READING COLUMN: {}\n".format(columName))
+def all_file_reading():
+    print("READING COLUMNS: {}\n".format(columName))
 
-for col in columName:
-    print("READING COLUMN: {}\n".format(col))
-    for file in [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]:
+    for col in columName:
+        print("READING COLUMN: {}\n".format(col))
+        for file in [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]:
 
-        filePath = os.path.join(path, file)
-        df=pd.read_csv(filePath)
+            filePath = os.path.join(path, file)
+            df=pd.read_csv(filePath)
+
+            
+            
+            specific_column=df[col] #extract column
+
+            
+            print("file : {}".format(file))
+            
+            estimate(specific_column)
+            
+        print("--------------------------")
+
+
+def single_file_reading():
+    print("READING COLUMNS: {}\n".format(columName))
+
+    for col in columName:
+        print("READING COLUMN: {}\n".format(col))
+
+        
+        df=pd.read_csv(path)
 
         
         
         specific_column=df[col] #extract column
 
         
-        print("file : {}".format(file))
-        
         estimate(specific_column)
-        
-    print("--------------------------")
+            
+        print("--------------------------")
+
+if __name__ == "__main__":
+
+    #all_file_reading()
+    single_file_reading()

@@ -8,8 +8,8 @@ STATIONARY_DIR = "outputStat/Stationary"
 # GLOBAL VALUE
 simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
-arrivalRate             = (450/STOP)   
-
+#arrivalRate             = (450/STOP)   
+arrivalRate             = (525/STOP)   
 
 #-------------------------------------------------------------------------
 # CLIENT CONFIGURATION

@@ -8,8 +8,8 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "Verify"
-columName = "w"
+stringName = "LambdaVar/525"
+columName = "x"
 
 
 path = os.path.join(ROOT_DIR,TEST_DIR,stringName)
@@ -18,6 +18,7 @@ path = os.path.join(ROOT_DIR,TEST_DIR,stringName)
 print("READING COLUMN: {}\n".format(columName))
 
 all_col = []
+time = None
 
 for file in [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]:
 
@@ -25,17 +26,19 @@ for file in [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)
     df1=pd.read_csv(filePath)
     try:
         specific_column=df1[columName] #extract column
+        time = df1["time"]
         all_col.append(specific_column.rename("{}".format(file)))
         print("file : {}".format(file))
     except:
         print("{} not valid csv".format(file))
     
-    
-df = pd.concat([all_col[2],all_col[1],all_col[0],all_col[3],all_col[4]],axis=1)
+time.rename("Time")
 
-df["Total"] = df.sum(axis=1)
-df["Socio"] = df.iloc[:,[0,1,4]].sum(axis=1)
-df["Tesse"] = df.iloc[:,[0,1,3,4]].sum(axis=1)
+df = pd.concat([time,all_col[2],all_col[1],all_col[0],all_col[3],all_col[4]],axis=1)
+
+df["Total"] = df.iloc[:,[1,2,3,4,5]].sum(axis=1)
+df["Socio"] = df.iloc[:,[1,2,5]].sum(axis=1)
+df["Tesse"] = df.iloc[:,[1,2,4,5]].sum(axis=1)
 print(df)
 
 
