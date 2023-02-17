@@ -10,7 +10,7 @@ simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
 arrivalRate             = (450/STOP)   # MODIFICABLE 
 #arrivalRate             = (525/STOP)
-timeSlotSize            = 0.25
+timeSlotSize            = 1
 timeSlotNum             = int(STOP/timeSlotSize)
 
 
