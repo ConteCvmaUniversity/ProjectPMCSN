@@ -8,7 +8,7 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "Slotted/Test"
+stringName = "Stationary"
 columName = "w"
 
 
@@ -87,6 +87,6 @@ def v2_slot_time():
 
 
 if __name__ == "__main__":
-    #v1_time()
-    v2_slot_time()
+    v1_time()
+    #v2_slot_time()
 

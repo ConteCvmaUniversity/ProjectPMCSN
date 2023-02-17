@@ -262,15 +262,19 @@ def main4():
     slottedResponceTimePlotAllSet(df,title="Responce Time for configuration 2 first 45 minute",subs="response time")
 
 
-
+def main5():
+    file = "outputStat/Stationary/w_stat_compact.csv"
+    path = os.path.join(ROOT_DIR,file)
+    df = getDFfromCSV(path)
+    responseTimePlotLambda(df,title="Responce Time ",batchSize=256)
 
 
 
 if __name__ == "__main__":
     #main1()
-    main2()
+    #main2()
     #main3()
     #main4()
-    
+    main5()
 
     

@@ -53,7 +53,7 @@ def main():
             
             #batch = (1024,128) #(b,k) TODO come selezionare
             batch = (256,64)
-            InfiniteHorizonStudy(batch)
+            InfiniteHorizonStudy(batch,seed=456021)
 
         elif (inp == 4):
             print("ATTENTION CONFIGURE SYSTEM MANUALLY, CONTROL IT")
