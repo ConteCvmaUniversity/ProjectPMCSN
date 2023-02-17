@@ -7,9 +7,9 @@ from lib.rvms import idfStudent
 from math import sqrt
 
 # for select the path of simulation file
-TEST_DIR = "outputStat/Slotted/conf1"
-stringName = "x_stat_compact.csv"
-stat = "x"
+TEST_DIR = "outputStat/Slotted/Test"
+stringName = "w_stat_compact.csv"
+stat = "w"
 #columName = ["Total"]
 #columName = ["Set1.csv","Set2.csv","Set3.csv","Set4.csv","Set5.csv"]
 columName = ["Set1.csv","Set2.csv","Set3.csv","Set4.csv","Set5.csv","Total","Tesse","Socio"]
@@ -94,7 +94,7 @@ def complex_reading(slot,step):
 
     df=pd.read_csv(path)
     
-    tempDict = {"Time":[x for x in range(0,421,step)]}
+    tempDict = {"Time":[x for x in np.arange(0,420.1,step)]}
 
     for col in columName:
 
@@ -138,4 +138,5 @@ if __name__ == "__main__":
 
     #all_file_reading()
     #single_file_reading()
-    complex_reading(421,1)
+    #complex_reading(421,1)
+    complex_reading(1681,0.25)

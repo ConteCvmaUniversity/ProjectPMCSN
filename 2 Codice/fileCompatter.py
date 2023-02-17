@@ -8,8 +8,8 @@ from math import sqrt
 
 # for select the path of simulation file
 TEST_DIR = "outputStat"
-stringName = "Slotted/conf1"
-columName = "x"
+stringName = "Slotted/Test"
+columName = "w"
 
 
 path = os.path.join(ROOT_DIR,TEST_DIR,stringName)

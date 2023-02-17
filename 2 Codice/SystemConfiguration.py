@@ -10,7 +10,7 @@ simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
 arrivalRate             = (450/STOP)   # MODIFICABLE 
 #arrivalRate             = (525/STOP)
-timeSlotSize            = 1
+timeSlotSize            = 0.25
 timeSlotNum             = int(STOP/timeSlotSize)
 
 
@@ -144,7 +144,7 @@ class ServerServiceTime5Exp(Enum):
 class ServerNumber(Enum): # MODIFICABLE
     SET1    = 2 
     SET2    = 2
-    SET3    = 4
+    SET3    = 5
     SET4    = 4
     SET5    = 2
 

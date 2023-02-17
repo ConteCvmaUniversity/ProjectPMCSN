@@ -111,14 +111,14 @@ def slottedResponceTimePlot(df:pd.DataFrame,title="",subs=""):
     
     y = df["Total_mean"].values[:v]
     w = df["Total_var"].values[:v]
-    #plt.plot(x,y,label="Global response time")
+
     var_plot(x,y,w,"blue",f"Global {subs}")
 
     plot_horizzontal_line(15,"blue","QoS 1",v)
 
     y = df["Tesse_mean"].values[:v]
     w = df["Tesse_var"].values[:v]
-    #plt.plot(x,y,label="Set 1-2-4-5 response time")
+
     var_plot(x,y,w,"orange",f"Set 1-2-4-5 {subs}")
 
     plot_horizzontal_line(7,"orange","QoS 2",v)
@@ -126,7 +126,7 @@ def slottedResponceTimePlot(df:pd.DataFrame,title="",subs=""):
     y = df["Socio_mean"].values[:v]
     w = df["Socio_var"].values[:v]
 
-    #plt.plot(x,y,label="Set 1-2-5 response time")
+
     var_plot(x,y,w,"green",f"Set 1-2-5 {subs}")
 
     plot_horizzontal_line(3,"green","QoS 3",v)
@@ -135,6 +135,55 @@ def slottedResponceTimePlot(df:pd.DataFrame,title="",subs=""):
 
     plt.legend(loc="upper left")
     plt.show()
+
+def slottedResponceTimePlotAllSet(df:pd.DataFrame,title="",subs=""):
+
+    plt.figure(figsize=(16,9))
+
+    #plt.xticks(np.arange(0, 421 , step=15),rotation=0)
+    v = 45
+    ste = 3
+
+    plt.xticks(np.arange(0, v+1 , step=ste),rotation=0)
+    
+    plt.title(f"{title}")
+
+    plt.ylabel(f"Response time (min)")
+    plt.xlabel("Time (min)")
+
+    x = df['Time'].values[:v]
+
+    y = df["Set1.csv_mean"].values[:v]
+    w = df["Set1.csv_var"].values[:v]
+
+    var_plot(x,y,w,"blue",f"Set 1 {subs}")
+    #mean = round(np.nanmean(y),3)
+    #plot_horizzontal_line(mean,"blue","mean",v)
+
+
+    y = df["Set2.csv_mean"].values[:v]
+    w = df["Set2.csv_var"].values[:v]
+    var_plot(x,y,w,"orange",f"Set 2 {subs}")
+
+    y = df["Set3.csv_mean"].values[:v]
+    w = df["Set3.csv_var"].values[:v]
+    var_plot(x,y,w,"green",f"Set 3 {subs}")
+    #mean = round(np.nanmean(y),3)
+    #plot_horizzontal_line(mean,"green","mean",v)
+
+    y = df["Set4.csv_mean"].values[:v]
+    w = df["Set4.csv_var"].values[:v]
+    var_plot(x,y,w,"purple",f"Set 4 {subs}")
+    #mean = round(np.nanmean(y),3)
+    #plot_horizzontal_line(mean,"purple","mean",v)
+
+    y = df["Set5.csv_mean"].values[:v]
+    w = df["Set5.csv_var"].values[:v]
+    var_plot(x,y,w,"brown",f"Set 5 {subs}")
+
+    plt.legend(loc="upper left")
+    plt.show()
+
 
 def slottedUtilization(df:pd.DataFrame,title="",subs=""):
     plt.figure(figsize=(16,9))
@@ -147,35 +196,37 @@ def slottedUtilization(df:pd.DataFrame,title="",subs=""):
     
     plt.title(f"{title}")
 
-    plt.ylabel(f"Response time (min)")
+    plt.ylabel(f"Utilization")
     plt.xlabel("Time (min)")
 
     x = df['Time'].values[:v]
 
     y = df["Set1.csv_mean"].values[:v]
-    normal_plot(x,y,"blue","Set 1 utilizzation")
+    normal_plot(x,y,"blue","Set 1 utilization")
     #mean = round(np.nanmean(y),3)
     #plot_horizzontal_line(mean,"blue","mean",v)
 
 
     y = df["Set2.csv_mean"].values[:v]
-    normal_plot(x,y,"orange","Set 2 utilizzation")
+    normal_plot(x,y,"orange","Set 2 utilization")
 
     y = df["Set3.csv_mean"].values[:v]
-    normal_plot(x,y,"green","Set 3 utilizzation")
+    normal_plot(x,y,"green","Set 3 utilization")
     #mean = round(np.nanmean(y),3)
     #plot_horizzontal_line(mean,"green","mean",v)
 
     y = df["Set4.csv_mean"].values[:v]
-    normal_plot(x,y,"purple","Set 4 utilizzation")
+    normal_plot(x,y,"purple","Set 4 utilization")
     #mean = round(np.nanmean(y),3)
     #plot_horizzontal_line(mean,"purple","mean",v)
 
     y = df["Set5.csv_mean"].values[:v]
-    normal_plot(x,y,"brown","Set 5 utilizzation")
+    normal_plot(x,y,"brown","Set 5 utilization")
 
     plt.legend(loc="upper left")
     plt.show()
+
+
 
 
 
@@ -193,16 +244,23 @@ def main1():
     responseTimePlotLambda(df,df2=df2,title="Responce Time on Infinite Horizon for lambda = 1.1429",batchSize=512)
 
 def main2():
-    file = "outputStat/Slotted/conf1/w_advaceReading.csv"
+    file = "outputStat/Slotted/Test/w_advaceReading.csv"
     path = os.path.join(ROOT_DIR,file)
     df = getDFfromCSV(path)
-    slottedResponceTimePlot(df,title="Responce Time for configuration 1",subs="response time")
+    slottedResponceTimePlot(df,title="Responce Time ",subs="response time")
 
 def main3():
-    file = "outputStat/Slotted/conf1/x_advaceReading.csv"
+    file = "outputStat/Slotted/conf3/x_advaceReading.csv"
     path = os.path.join(ROOT_DIR,file)
     df = getDFfromCSV(path)
-    slottedUtilization(df,title="Set Utilizzation for configuration 1")
+    slottedUtilization(df,title="Set Utilization for configuration 3")
+
+def main4():
+    file = "outputStat/Slotted/conf2/w_advaceReading.csv"
+    path = os.path.join(ROOT_DIR,file)
+    df = getDFfromCSV(path)
+    slottedResponceTimePlotAllSet(df,title="Responce Time for configuration 2 first 45 minute",subs="response time")
+
 
 
 
@@ -211,7 +269,8 @@ def main3():
 if __name__ == "__main__":
     #main1()
     main2()
-    #main3()    
+    #main3()
+    #main4()
     
 
     

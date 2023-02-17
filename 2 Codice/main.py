@@ -89,7 +89,7 @@ def main():
 
             repli   = 100
             seed    = 56486921
-            file    = "outputStat/Slotted/conf1" # MODIFICABLE
+            file    = "outputStat/Slotted/Test" # MODIFICABLE
             slotted_test(repli,file,seed)
 
         elif (inp == 0):
