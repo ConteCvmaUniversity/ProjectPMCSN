@@ -79,7 +79,7 @@ def main():
             FindBatch(64)
         
         elif (inp == 8):
-            file = "outputStat/LambdaVar/520"
+            file = "outputStat/LambdaVar/520" # MODIFICABLE
             batch = (512,64)
             lambda_variation(batch,file)
 
@@ -89,7 +89,7 @@ def main():
 
             repli   = 100
             seed    = 56486921
-            file    = "outputStat/Slotted/conf1"
+            file    = "outputStat/Slotted/conf1" # MODIFICABLE
             slotted_test(repli,file,seed)
 
         elif (inp == 0):
@@ -130,6 +130,7 @@ def FindBatch(k):
             os.mkdir(os.path.join(os.path.dirname(__file__),path))
         except FileExistsError:
             print("existing dir")
+
         sim.reset_initial_state(seed,simulationTime=b*k)
 
         batch = (b,k)

@@ -8,9 +8,9 @@ STATIONARY_DIR = "outputStat/Stationary"
 # GLOBAL VALUE
 simulationTimeG         = STOP
 probabilityDiscardSet1  = 0.01
-#arrivalRate             = (450/STOP)   
-arrivalRate             = (525/STOP)
-timeSlotSize            = 5
+arrivalRate             = (450/STOP)   # MODIFICABLE 
+#arrivalRate             = (525/STOP)
+timeSlotSize            = 1
 timeSlotNum             = int(STOP/timeSlotSize)
 
 
@@ -66,7 +66,7 @@ CLIENTTYPENUM = len(ClientType)
 # SERVER STATE CONFIGURATION
 #-------------------------------------------------------------------------
 
-EXPONENTIAL = False  # if true all service are exponential
+EXPONENTIAL = False  # if true all service are exponential # MODIFICABLE
 
 class ServerStateType():
     IDLE    = -1
@@ -141,7 +141,7 @@ class ServerServiceTime5Exp(Enum):
 # SERVER NUMBER CONFIGURATION
 #-------------------------------------------------------------------------
 
-class ServerNumber(Enum):
+class ServerNumber(Enum): # MODIFICABLE
     SET1    = 2 
     SET2    = 2
     SET3    = 4
